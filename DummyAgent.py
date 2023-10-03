@@ -28,7 +28,7 @@ class DummyAgent(Agent):
         self.add_behaviour(self.my_behav)
 
 async def main():
-    dummy = DummyAgent("TrafficControl@nixnet.services", "ISIA-MATFS")
+    dummy = DummyAgent("admin@localhost", "SmartGrid")
     await dummy.start()
 
     # wait until user interrupts with ctrl+C

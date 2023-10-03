@@ -2,15 +2,9 @@
 
 python version: Python 3.11.5
 
-conta aqui:
-https://xmpp.org/getting-started/
+username: admin@localhost
 
-user: TrafficControl
-server: nixnet.services
-
-
-username: TrafficControl@nixnet.services
-password: ISIA-MATFS
+password: SmartGrid
 
 ## Installation
 
