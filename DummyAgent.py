@@ -1,9 +1,9 @@
 import asyncio
 import spade
+from spade import wait_until_finished
 from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour
 
-MAX_COUNTER = 3
 
 class DummyAgent(Agent):
     class MyBehav(CyclicBehaviour):
@@ -14,33 +14,21 @@ class DummyAgent(Agent):
         async def run(self):
             print("Counter: {}".format(self.counter))
             self.counter += 1
-            if self.counter > MAX_COUNTER:
-                self.kill(exit_code=10)
-                return
             await asyncio.sleep(1)
-
-        async def on_end(self):
-            print("Behaviour finished with exit code {}.".format(self.exit_code))
 
     async def setup(self):
         print("Agent starting . . .")
-        self.my_behav = self.MyBehav()
-        self.add_behaviour(self.my_behav)
+        b = self.MyBehav()
+        self.add_behaviour(b)
+
 
 async def main():
     dummy = DummyAgent("admin@localhost", "SmartGrid")
     await dummy.start()
+    print("DummyAgent started. Check its console to see the output.")
 
-    # wait until user interrupts with ctrl+C
-    while not dummy.my_behav.is_killed():
-        try:
-            await asyncio.sleep(1)
-        except KeyboardInterrupt:
-            break
-
-    assert dummy.my_behav.exit_code == 10
-
-    await dummy.stop()
+    print("Wait until user interrupts with ctrl+C")
+    await wait_until_finished(dummy)
 
 
 if __name__ == "__main__":
