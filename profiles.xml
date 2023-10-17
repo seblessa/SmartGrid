@@ -1,0 +1,5 @@
+<profile>
+    <agent name="GridController" role="grid_controller" />
+    <agent name="PowerGenerator" role="power_generator" />
+    <agent name="EnergyConsumer" role="energy_consumer" />
+</profile>
