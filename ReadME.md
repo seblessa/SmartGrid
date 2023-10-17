@@ -31,5 +31,8 @@ python3 main.py
 
 ## Explanation of our thought process
 
-We started by creating two agents `GridControllerAgent` and `PowerGeneratorAgent`.
-Then we tested the messaging system between the two agents.
+We started by creating two agents `GridControllerAgent` and `PowerGeneratorAgent` and `EnergyConsumerAgent`.
+Then we tested the messaging system between the three agents.
+After that we created an environment for the agents to interact with each other.
+
+
