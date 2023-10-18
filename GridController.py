@@ -14,7 +14,6 @@ class GridControllerAgent(SmartGridAgent):
         async def run(self):
             if self.agent.environment:
                 message = await self.receive(timeout=10)  # Specify the timeout to handle non-blocking receive
-
                 if message:
                     if "Increase power generation" in message.body:
                         self.agent.send_message("power_generator@localhost", "Increase power generation")
@@ -23,6 +22,6 @@ class GridControllerAgent(SmartGridAgent):
 
                     # Handle the response properly if needed
                 else:
-                    print("Did not receive a message from Energy Consumer.")
+                    print("Grid did not receive a message from Energy Consumer.")
             else:
                 print("Error: Environment not set")

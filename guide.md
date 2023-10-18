@@ -17,15 +17,15 @@ The aim is to design and implement a multi-agent system to efficiently manage an
 ## Milestones
 ### Week 1: Research & Planning
 - [X] Research SPADE/JADE features and functionalities.
-- [ ] Define roles and functionalities for different agents.
+- [X] Define roles and functionalities for different agents.
 
 ### Week 2-3: Agent Implementation and Environment Modeling
-- [ ] Design and implement different types of agents (e.g., Grid Controllers, Generators, Consumers).
+- [X] Design and implement different types of agents (e.g., Grid Controllers, Generators, Consumers).
 - [ ] Implement basic components of the smart grid environment (power sources, consumers, infrastructure).
-- [ ] Establish initial communication protocols among agents.
+- [X] Establish initial communication protocols among agents.
 
 ### Week 4: Advanced Features
-- [ ] Implement realistic and simulated power generation and consumption patterns.
+- [X] Implement realistic and simulated power generation and consumption patterns.
 - [ ] Test and refine the agent interactions within the evolving environment.
 - [ ] Implement more sophisticated agent behaviors, such as load balancing and fault detection.
 

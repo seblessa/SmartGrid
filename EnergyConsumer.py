@@ -9,17 +9,17 @@ class EnergyConsumerAgent(SmartGridAgent):
         self.add_behaviour(self.ConsumeEnergyBehav())
 
     async def update_demand(self, demand):
-        if self.environment:
+        current_demand = self.environment.get_demand()
+        if current_demand + demand >= 0:
             self.environment.update_demand(demand)
             await self.ConsumeEnergyBehav().on_start()
         else:
-            print("Error: Environment not set")
+            print("Error: Cannot reduce demand below 0.")
 
     class ConsumeEnergyBehav(OneShotBehaviour):
         async def run(self):
             if self.agent.environment:
                 balance = self.agent.environment.get_balance()
-
                 if balance < 0:
                     self.agent.send_message("grid_controller@localhost", "Increase power generation")
                 elif balance > 0:

@@ -1,22 +1,26 @@
 class SmartGridEnvironment:
     def __init__(self):
-        self.power_generation = 0
-        self.power_demand = 0
-        self.power_balance = 0
+        self.generation = 0
+        self.demand = 0
+        self.balance = 0
 
     def update_demand(self, demand):
-        self.power_demand += demand
-        self.update_balance()
+        if demand >= 0:
+            self.demand += demand
+            self.update_balance()
 
     def update_generation(self, generation):
-        self.power_generation += generation
+        self.generation += generation
         self.update_balance()
 
     def update_balance(self):
-        self.power_balance = self.power_generation - self.power_demand
+        self.balance = self.generation - self.demand
 
     def get_balance(self):
-        return self.power_balance
+        return self.balance
+
+    def get_demand(self):
+        return self.demand
 
     def get_status(self):
-        return self.power_demand, self.power_generation, self.power_balance
+        return self.demand, self.generation, self.balance

@@ -1,5 +1,8 @@
+import asyncio
+
 from SmartGrid import SmartGridAgent
 from spade.behaviour import OneShotBehaviour
+
 
 class PowerGeneratorAgent(SmartGridAgent):
     def __init__(self, jid, password):
@@ -26,13 +29,12 @@ class PowerGeneratorAgent(SmartGridAgent):
         async def run(self):
             if self.agent.environment:
                 message = await self.receive(timeout=10)  # Specify the timeout to handle non-blocking receive
-
                 if message:
                     if "Increase power generation" in message.body:
                         await self.agent.increase_power_generation()
                     elif "Decrease power generation" in message.body:
                         await self.agent.decrease_power_generation()
                 else:
-                    print("Did not receive a message from Grid Controller.")
+                    print("Power did not receive a message from Grid Controller.")
             else:
                 print("Error: Environment not set")

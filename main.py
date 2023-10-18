@@ -5,55 +5,52 @@ from GridController import GridControllerAgent
 from EnergyConsumer import EnergyConsumerAgent
 from environment import SmartGridEnvironment
 
-# Initialize pygame
-pygame.init()
-
-# Constants for colors
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-
-# Screen dimensions
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-
-# Create a screen
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Smart Grid Simulation")
-
-# Font for displaying text
-font = pygame.font.Font(None, 36)
-
-# Constants for adjusting demand
-DEMAND_CHANGE = 100
-
-# Initialize demand and environment
-demand = 0
-environment = SmartGridEnvironment()
 
 async def main():
-    global demand
+    # Initialize pygame
+    pygame.init()
+
+    # Constants for colors
+    BLACK = (0, 0, 0)
+    WHITE = (255, 255, 255)
+
+    # Screen dimensions
+    SCREEN_WIDTH = 250
+    SCREEN_HEIGHT = 150
+
+    # Create a screen
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_caption("Smart Grid Simulation")
+
+    # Font for displaying text
+    font = pygame.font.Font(None, 36)
+
     # Create agents and pass the environment
     grid_controller = GridControllerAgent('grid_controller@localhost', 'SmartGrid')
     power_generator = PowerGeneratorAgent('power_generator@localhost', 'SmartGrid')
     energy_consumer = EnergyConsumerAgent('energy_consumer@localhost', 'SmartGrid')
 
+    environment = SmartGridEnvironment()
+
     grid_controller.environment = environment
     power_generator.environment = environment
     energy_consumer.environment = environment
 
-    # Start agents and add behaviors
-    await asyncio.gather(
-        grid_controller.start(),
-        power_generator.start(),
-        energy_consumer.start()
-    )
+    def add_behaviors():
+        grid_controller.add_behaviour(GridControllerAgent.LoadBalancingBehav())
+        power_generator.add_behaviour(PowerGeneratorAgent.PowerGenerationBehav())
+        energy_consumer.add_behaviour(EnergyConsumerAgent.ConsumeEnergyBehav())
 
-    # Main loop
+    await grid_controller.start()
+    await power_generator.start()
+    await energy_consumer.start()
+
+    demand_change = 100
+    demand_down = False
+    demand_up = False
     running = True
+
     while running:
-        await asyncio.sleep(1)
-        demand_down = False
-        demand_up = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -64,9 +61,13 @@ async def main():
                     demand_down = True
 
         if demand_up:
-            await energy_consumer.update_demand(DEMAND_CHANGE)
+            await energy_consumer.update_demand(demand_change)
+            demand_up = False
         elif demand_down:
-            await energy_consumer.update_demand(-DEMAND_CHANGE)
+            await energy_consumer.update_demand(demand_change*-1)
+            demand_down = False
+
+        await asyncio.sleep(1)
 
         # Clear the screen
         screen.fill(BLACK)
@@ -83,8 +84,9 @@ async def main():
         screen.blit(demand_text, (10, 90))
 
         pygame.display.flip()
-
+        add_behaviors()
     pygame.quit()
+
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
