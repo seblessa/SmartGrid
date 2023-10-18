@@ -12,7 +12,6 @@ class EnergyConsumerAgent(SmartGridAgent):
         current_demand = self.environment.get_demand()
         if current_demand + demand >= 0:
             self.environment.update_demand(demand)
-            await self.ConsumeEnergyBehav().on_start()
         else:
             print("Error: Cannot reduce demand below 0.")
 
