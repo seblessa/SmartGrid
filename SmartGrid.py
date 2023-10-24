@@ -8,6 +8,9 @@ class SmartGridAgent(Agent):
         super().__init__(jid, password)
         self.environment = None
 
+    def set_env(self, env):
+        self.environment = env
+
     def send_message(self, receiver, message):
         class SendMessageBehaviour(OneShotBehaviour):
             async def run(self):

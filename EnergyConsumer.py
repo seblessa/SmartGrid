@@ -1,11 +1,10 @@
 from SmartGrid import SmartGridAgent
 from spade.behaviour import OneShotBehaviour
 
+
 class EnergyConsumerAgent(SmartGridAgent):
     def __init__(self, jid, password):
         super().__init__(jid, password)
-        self.environment = None
-        # Add the behavior to the agent
         self.add_behaviour(self.ConsumeEnergyBehav())
 
     async def update_demand(self, demand):

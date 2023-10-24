@@ -8,7 +8,6 @@ class PowerGeneratorAgent(SmartGridAgent):
     def __init__(self, jid, password):
         super().__init__(jid, password)
         self.balance = 0
-        self.environment = None
         self.add_behaviour(self.PowerGenerationBehav())
 
     async def increase_power_generation(self):

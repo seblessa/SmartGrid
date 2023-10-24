@@ -3,6 +3,10 @@ class SmartGridEnvironment:
         self.generation = 0
         self.demand = 0
         self.balance = 0
+        self.city = None
+
+    def set_city(self, city):
+        self.city = city
 
     def update_demand(self, demand):
         if demand >= 0:

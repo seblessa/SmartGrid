@@ -1,10 +1,10 @@
 from spade.behaviour import OneShotBehaviour
 from SmartGrid import SmartGridAgent
 
+
 class GridControllerAgent(SmartGridAgent):
     def __init__(self, jid, password):
         super().__init__(jid, password)
-        self.environment = None
         self.add_behaviour(self.LoadBalancingBehav())
 
     async def get_status(self):

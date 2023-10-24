@@ -32,9 +32,9 @@ async def main():
 
     environment = SmartGridEnvironment()
 
-    grid_controller.environment = environment
-    power_generator.environment = environment
-    energy_consumer.environment = environment
+    grid_controller.set_env(environment)
+    power_generator.set_env(environment)
+    energy_consumer.set_env(environment)
 
     def add_behaviors():
         grid_controller.add_behaviour(GridControllerAgent.LoadBalancingBehav())
