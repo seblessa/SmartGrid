@@ -1,8 +1,6 @@
 import pygame
 import asyncio
-from PowerGenerator import PowerGeneratorAgent
-from GridController import GridControllerAgent
-from EnergyConsumer import EnergyConsumerAgent
+from Agents import PowerGeneratorAgent, GridControllerAgent, EnergyConsumerAgent
 from environment import SmartGridEnvironment
 
 
@@ -30,8 +28,11 @@ async def main():
     power_generator = PowerGeneratorAgent('power_generator@localhost', 'SmartGrid')
     energy_consumer = EnergyConsumerAgent('energy_consumer@localhost', 'SmartGrid')
 
+
+    # Create environment
     environment = SmartGridEnvironment()
 
+    # Set environment for agents
     grid_controller.set_env(environment)
     power_generator.set_env(environment)
     energy_consumer.set_env(environment)
@@ -64,7 +65,7 @@ async def main():
             await energy_consumer.update_demand(demand_change)
             demand_up = False
         elif demand_down:
-            await energy_consumer.update_demand(demand_change*-1)
+            await energy_consumer.update_demand(demand_change * -1)
             demand_down = False
 
         await asyncio.sleep(1)

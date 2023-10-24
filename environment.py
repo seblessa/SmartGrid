@@ -1,9 +1,9 @@
 class SmartGridEnvironment:
-    def __init__(self):
+    def __init__(self, city):
         self.generation = 0
         self.demand = 0
         self.balance = 0
-        self.city = None
+        self.city = city
 
     def set_city(self, city):
         self.city = city
