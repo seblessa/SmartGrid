@@ -8,12 +8,14 @@
 
 ## List of users on our server
 
-| Username                    | Password    |
-|-----------------------------|-------------|
-| `admin@localhost`           | `SmartGrid` | 
-| `grid_controller@localhost` | `SmartGrid` |
-| `power_generator@localhost` | `SmartGrid` |
-| `energy_consumer@localhost` | `SmartGrid` |
+| Username                                | Password    |
+|-----------------------------------------|-------------|
+| `admin@localhost`                       | `SmartGrid` | 
+| `grid_controller@localhost`             | `SmartGrid` |
+| `power_generator@localhost`             | `SmartGrid` |
+| `energy_consumer@localhost`             | `SmartGrid` |
+| `NeighborhoodControllerAgent@localhost` | `SmartGrid` |
+
 
 
 ## Installation

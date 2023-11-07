@@ -1,25 +1,36 @@
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame
+from Agents import *
 from Structures import *
-from random import randint
-import pygame
-
-# Create neighborhoods with houses
-neighborhood1 = Neighborhood([House(randint(2, 7)) for _ in range(10)])
-neighborhood2 = Neighborhood([House(randint(2, 7)) for _ in range(10)])
-
-# Create schools
-school1 = School(neighborhood1)
-school2 = School(neighborhood2)
-
-# Create hospitals
-hospital1 = Hospital(neighborhood1)
-hospital2 = Hospital(neighborhood2)
-
-# Create emergency services
-emergency_services1 = EmergencyServices([neighborhood1, neighborhood2])
+from environment import SmartGridEnvironment
 
 # Create city
-city1 = City("Vila Lessa", [neighborhood1, neighborhood2], [school1, school2], [hospital1, hospital2],
-             [emergency_services1])
+city1 = City("Vila Lessa")
+
+print(city1.get_demand())
+
+env = SmartGridEnvironment(city1)
+
+print(env.get_demand())
+
+exit(0)
+
+
+# Create agents and pass the environment
+
+
+grid_controller = GridControllerAgent('grid_controller@localhost', 'SmartGrid')
+power_generator = PowerGeneratorAgent('power_generator@localhost', 'SmartGrid')
+energy_consumer = EnergyConsumerAgent('energy_consumer@localhost', 'SmartGrid')
+
+# Create environment
+
+
+# Set environment for agents
+grid_controller.set_env(env)
+power_generator.set_env(env)
+energy_consumer.set_env(env)
 
 # Constants for colors
 WHITE = (255, 255, 255)
@@ -40,28 +51,28 @@ pygame.display.set_caption(city1.name)
 
 
 # Function to draw houses
-def draw_houses():
+def draw_houses(env):
     pass
 
 
-def draw_hospital():
+def draw_hospital(env):
     pass
 
 
-def draw_school():
+def draw_school(env):
     pass
 
 
 # Function to draw neighborhoods
-def draw_neighborhoods():
-    draw_houses()
-    draw_school()
-    draw_hospital()
+def draw_neighborhoods(env):
+    draw_houses(env)
+    draw_school(env)
+    draw_hospital(env)
     pass
 
 
 # Function to draw emergency services
-def draw_emergency_services():
+def draw_emergency_services(env):
     pass
 
 
