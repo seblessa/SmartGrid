@@ -107,17 +107,25 @@ class City:
             stations_number = 2
         self.stations = [EmergencyStation(self.neighborhoods) for _ in range(stations_number)]
         self.demand = self.__update_demand()
+        self.generation = self.__update_generation()
 
     def __update_demand(self):
-        self.demand = 0
+        demand = 0
         for neighborhood in self.neighborhoods:
-            self.demand += neighborhood.get_demand()
+            demand += neighborhood.get_demand()
         for station in self.stations:
-            self.demand += station.get_demand()
-        return self.demand
+            demand += station.get_demand()
+        return demand
 
     def get_demand(self):
         return self.demand
+
+    def __update_generation(self):
+        generation = 0
+        return generation
+
+    def get_generation(self):
+        return self.generation
 
     def get_neighborhoods(self):
         return self.neighborhoods
@@ -131,4 +139,3 @@ class City:
         total_demand = sum(neighborhood.get_demand() for neighborhood in self.neighborhoods) + sum(station.get_demand() for station in self.stations)
 
         return f'{self.name}\n\n' + '\n'.join(neighborhood_strings) + '\n' + '\n'.join(station_strings) + f'\nTotal Demand = {total_demand}'
-
