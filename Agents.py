@@ -4,12 +4,12 @@ from spade.message import Message
 
 
 class SmartGridAgent(Agent):
-    def __init__(self, jid, password):
+    def __init__(self, jid, password, env):
         super().__init__(jid, password)
-        self.environment = None
-
-    def set_env(self, env):
         self.environment = env
+
+    def get_env(self):
+        return self.environment
 
     def send_message(self, receiver, message):
         class SendMessageBehaviour(OneShotBehaviour):
@@ -34,12 +34,11 @@ class SmartGridAgent(Agent):
 
 class NeighborhoodControllerAgent(SmartGridAgent):
     def __init__(self, jid, password, env):
-        super().__init__(jid, password)
+        super().__init__(jid, password, env)
         self.add_behaviour(self.UpdateDemandBehav())
         self.houses = env.get_houses()
         self.school = env.get_school()
         self.hospital = env.get_hospital()
-
 
     async def update_demand(self, demand):
         current_demand = self.environment.get_demand()
@@ -65,10 +64,9 @@ class NeighborhoodControllerAgent(SmartGridAgent):
                 print("Error: Environment not set")
 
 
-
 class GridControllerAgent(SmartGridAgent):
-    def __init__(self, jid, password):
-        super().__init__(jid, password)
+    def __init__(self, jid, password, environment):
+        super().__init__(jid, password, environment)
         self.add_behaviour(self.LoadBalancingBehav())
 
     async def get_status(self):
@@ -92,8 +90,8 @@ class GridControllerAgent(SmartGridAgent):
 
 
 class EnergyConsumerAgent(SmartGridAgent):
-    def __init__(self, jid, password):
-        super().__init__(jid, password)
+    def __init__(self, jid, password, environment):
+        super().__init__(jid, password, environment)
         self.add_behaviour(self.ConsumeEnergyBehav())
 
     async def update_demand(self, demand):
@@ -118,8 +116,8 @@ class EnergyConsumerAgent(SmartGridAgent):
 
 
 class PowerGeneratorAgent(SmartGridAgent):
-    def __init__(self, jid, password):
-        super().__init__(jid, password)
+    def __init__(self, jid, password, environment):
+        super().__init__(jid, password, environment)
         self.balance = 0
         self.add_behaviour(self.PowerGenerationBehav())
 
