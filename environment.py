@@ -10,6 +10,8 @@ class SmartGridEnvironment:
         self.generation = 0
 
         self.neighborhoods = [Neighborhood() for _ in range(random.randint(3, 5))]
+        self.hospitals = [Hospital(sum([neighborhood.get_houses_demand() for neighborhood in self.neighborhoods]))
+                          for _ in range((len(self.neighborhoods) // 3) + 1)]
         self.policeDepartments = [PoliceDepartment(self.neighborhoods) for _ in
                                   range((len(self.neighborhoods) // 3) + 1)]
         self.fireDepartments = [FireDepartment(self.neighborhoods) for _ in range((len(self.neighborhoods) // 4) + 1)]
@@ -52,13 +54,14 @@ class SmartGridEnvironment:
             solarEnergyStation.refresh(current_time)
             self.solarGeneration += solarEnergyStation.get_generation()
 
-        self.HydroEnergyStation.refresh(current_time)
+        self.HydroEnergyStation.refresh()
         self.hydroGeneration = self.HydroEnergyStation.get_generation()
 
         self.FossilFuelEnergyStation.get_generation()
         self.fossilFuelGeneration = self.FossilFuelEnergyStation.get_generation()
 
         self.generation = self.windGeneration + self.solarGeneration + self.hydroGeneration + self.fossilFuelGeneration
+
 
     def update_time(self):
         day, weekday, day_or_night = self.current_time
@@ -81,6 +84,9 @@ class SmartGridEnvironment:
     def get_neighborhoods(self):
         return self.neighborhoods
 
+    def get_hospitals(self):
+        return self.hospitals
+
     def get_police_department(self):
         return self.policeDepartments
 
@@ -102,6 +108,8 @@ class SmartGridEnvironment:
     def __str__(self):
         neighborhood_strings = [f'Neighborhood {i + 1} - Demand={neighborhood.get_demand()}' for i, neighborhood in
                                 enumerate(self.neighborhoods)]
+        hospital_strings = [f'Hospitals {i + 1} - Demand={hospital.get_demand()}' for i, hospital in
+                            enumerate(self.hospitals)]
         police_strings = [f'Police Department {i + 1} - Demand={police.get_demand()}' for i, police in
                           enumerate(self.policeDepartments)]
         fire_string = [f'Fire Department {i + 1} - Demand={fire.get_demand()}' for i, fire in
@@ -121,6 +129,7 @@ class SmartGridEnvironment:
                             self.hydroGeneration + self.fossilFuelGeneration)
 
         return ('\n'.join(neighborhood_strings) + '\n' +
+                '\n'.join(hospital_strings) + '\n' +
                 '\n'.join(police_strings) + '\n' +
                 '\n'.join(fire_string) + '\n' +
                 f'\nTotal Demand = {total_demand}\n\n' +

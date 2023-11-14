@@ -1,44 +1,42 @@
 import random
 
+BASE_ENERGY = 100
 
-class House:
+
+class Structure:
+    def __init__(self):
+        self.demand = 0
+        self.generation = 0
+        self.online = False
+
+    def get_demand(self):
+        return self.demand
+
+    def get_generation(self):
+        return self.generation
+
+    def refresh(self, energy):
+        self.generation = energy
+        self.online = True if self.generation - self.demand >= 0 else False
+
+
+class House(Structure):
     def __init__(self, n):
+        super().__init__()
         self.n_people = n
         self.demand = self.__update_demand()
 
-    def update_n_people(self, x):
-        if self.n_people + x >= 2:
-            self.n_people += x
-            self.__update_demand()
-
     def __update_demand(self):
-        self.demand = self.n_people * 100
+        self.demand = self.n_people * BASE_ENERGY
         return self.demand
 
     def get_n_people(self):
         return self.n_people
 
-    def get_demand(self):
-        return self.demand
 
-
-class Hospital:
+class School(Structure):
     def __init__(self, houses_in_neighborhood):
-        self.houses = houses_in_neighborhood
-        self.demand = self.__update_demand()
-
-    def __update_demand(self):
-        self.demand = 0
-        for house in self.houses:
-            self.demand += house.get_demand() / 2
-        return self.demand
-
-    def get_demand(self):
-        return self.demand
-
-
-class School:
-    def __init__(self, houses_in_neighborhood):
+        super().__init__()
         self.houses = houses_in_neighborhood
         self.demand = self.__update_demand()
 
@@ -48,26 +46,13 @@ class School:
             self.demand += house.get_n_people() - 2
         return self.demand
 
-    def get_demand(self):
-        return self.demand
-
 
 class Neighborhood:
     def __init__(self):
         houses = [House(random.randint(2, 7)) for _ in range(random.randint(8, 12))]
         self.houses = houses
-        self.hospitals = Hospital(houses)
         self.schools = School(houses)
-        self.demand = self.__update_demand()
         self.generation = 0
-
-    def __update_demand(self):
-        self.demand = 0
-        for house in self.houses:
-            self.demand += house.get_demand()
-        self.demand += self.hospitals.get_demand()
-        self.demand += self.schools.get_demand()
-        return self.demand
 
     def __update_generation(self, increase):
         self.generation += increase
@@ -78,17 +63,32 @@ class Neighborhood:
     def get_houses_demand(self):
         return sum([house.get_demand() for house in self.houses])
 
+    def get_school_demand(self):
+        return self.schools.get_demand()
+
     def get_demand(self):
-        return self.demand
+        return self.get_houses_demand() + self.get_school_demand()
+
+    def refresh(self):
+
+        for house in self.houses:
+            house.refresh()
 
     def __str__(self):
         house_strings = [f'House {i + 1} - Demand={house.get_demand()}' for i, house in enumerate(self.houses)]
         return '\n'.join(
-            house_strings) + f'\n\nHospital - Demand={self.hospitals.get_demand()}\nSchool - Demand={self.schools.get_demand()}\n\nTotal = {self.get_demand()}\n\n'
+            house_strings) + f'\nSchool - Demand={self.schools.get_demand()}\n\nTotal = {self.get_demand()}\n\n'
 
 
-class PoliceDepartment:
+class Hospital(Structure):
+    def __init__(self, demand_from_neighborhoods):
+        super().__init__()
+        self.demand = demand_from_neighborhoods * 0.7
+
+
+class PoliceDepartment(Structure):
     def __init__(self, neighborhoods):
+        super().__init__()
         self.neighborhoods = neighborhoods
         self.demand = self.__update_demand()
 
@@ -98,12 +98,10 @@ class PoliceDepartment:
             self.demand += neighborhood.get_demand() / 2
         return self.demand
 
-    def get_demand(self):
-        return self.demand
 
-
-class FireDepartment:
+class FireDepartment(Structure):
     def __init__(self, neighborhoods):
+        super().__init__()
         self.neighborhoods = neighborhoods
         self.demand = self.__update_demand()
 
@@ -111,9 +109,6 @@ class FireDepartment:
         self.demand = 0
         for neighborhood in self.neighborhoods:
             self.demand += neighborhood.get_demand() / 3
-        return self.demand
-
-    def get_demand(self):
         return self.demand
 
 
@@ -179,10 +174,10 @@ class HydroEnergyStation:
     def get_generation(self):
         return self.generation
 
-    def refresh(self, time):
-        day, weekday, day_or_night = time
+    def refresh(self):
         values = [250, 1000, 5750, 12500, 18000, 25000, 31500]
-        self.generation = random.choices(values)
+        index = random.randint(0, len(values)-1)
+        self.generation = values[index]
 
 
 class FossilFuelEnergyStation:
