@@ -37,4 +37,8 @@ We started by creating two agents `GridControllerAgent` and `PowerGeneratorAgent
 Then we tested the messaging system between the three agents.
 After that we created an environment for the agents to interact with each other.
 
+## Interesting for our project
 
+- Ter os agentes a comunicar entre si e não com o ambiente onde existem (ambiente multi-agente)
+- Centralização vs Descentralização.
+- Contract net
