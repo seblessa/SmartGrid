@@ -29,6 +29,9 @@ class SmartGridAgent(Agent):
         self.add_behaviour(ReceiveMessageBehaviour())
 
 
+# TODO: CODE BELOW NOT REVISED
+
+
 class GridControllerAgent(SmartGridAgent):
     def __init__(self, jid, password, environment):
         super().__init__(jid, password, environment)

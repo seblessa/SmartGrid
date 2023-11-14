@@ -181,10 +181,8 @@ class HydroEnergyStation:
 
     def refresh(self, time):
         day, weekday, day_or_night = time
-        if weekday == "Tuesday" or weekday == "Friday":
-            self.generation = 20
-        else:
-            self.generation = 25000
+        values = [250, 1000, 5750, 12500, 18000, 25000, 31500]
+        self.generation = random.choices(values)
 
 
 class FossilFuelEnergyStation:

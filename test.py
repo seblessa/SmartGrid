@@ -6,6 +6,7 @@ from environment import SmartGridEnvironment
 
 city = SmartGridEnvironment()
 
+for
 
 while True:
     day, weekday, day_night = city.get_time()
