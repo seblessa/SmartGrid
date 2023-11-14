@@ -1,20 +1,18 @@
 import time
-from Structures import City
 from environment import SmartGridEnvironment
 
 
 # Create city
-city1 = City("DCCity")
 
-env = SmartGridEnvironment(city1)
+city = SmartGridEnvironment()
 
 
 while True:
-    day, weekday, day_night = env.get_time()
+    day, weekday, day_night = city.get_time()
     print(f"Day: {day}, {weekday} during the {day_night}:\n")
 
-    print(city1)
+    print(city)
 
     print("\n\n\n")
-    env.update()
+    city.update_time()
     time.sleep(2)

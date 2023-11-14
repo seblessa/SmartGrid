@@ -1,5 +1,5 @@
 from spade.agent import Agent
-from spade.behaviour import OneShotBehaviour
+from spade.behaviour import OneShotBehaviour, CyclicBehaviour
 from spade.message import Message
 
 
@@ -20,48 +20,13 @@ class SmartGridAgent(Agent):
 
         self.add_behaviour(SendMessageBehaviour())
 
-    def receive_message(self, timeout=10):
-        class ReceiveMessageBehaviour(OneShotBehaviour):
+    def receive_message(self):
+        class ReceiveMessageBehaviour(CyclicBehaviour):
             async def run(self):
-                msg = await self.receive(timeout=timeout)
-                if msg:
-                    print(f"Received message: {msg.body}")
-                else:
-                    print(f"Did not receive any message after {timeout} seconds")
+                msg = await self.receive()
+                print(f"Received message: {msg.body}")
 
         self.add_behaviour(ReceiveMessageBehaviour())
-
-
-class NeighborhoodControllerAgent(SmartGridAgent):
-    def __init__(self, jid, password, env):
-        super().__init__(jid, password, env)
-        self.add_behaviour(self.UpdateDemandBehav())
-        self.houses = env.get_houses()
-        self.school = env.get_school()
-        self.hospital = env.get_hospital()
-
-    async def update_demand(self, demand):
-        current_demand = self.environment.get_demand()
-        if current_demand + demand >= 0:
-            self.environment.update_demand(demand)
-        else:
-            print("Error: Cannot reduce demand below 0.")
-
-    class UpdateDemandBehav(OneShotBehaviour):
-        async def run(self):
-            if self.agent.environment:
-                message = await self.receive(timeout=60)  # Specify the timeout to handle non-blocking receive
-                if message:
-                    if "Increase demand" in message.body:
-                        await self.agent.update_demand(20)
-                    elif "Decrease demand" in message.body:
-                        await self.agent.update_demand(-20)
-
-                    # Handle the response properly if needed
-                else:
-                    print("Neighborhood did not receive a message from Energy Consumer.")
-            else:
-                print("Error: Environment not set")
 
 
 class GridControllerAgent(SmartGridAgent):
@@ -72,14 +37,14 @@ class GridControllerAgent(SmartGridAgent):
     async def get_status(self):
         return self.environment.get_status()
 
-    class LoadBalancingBehav(OneShotBehaviour):
+    class LoadBalancingBehav(CyclicBehaviour):
         async def run(self):
             if self.agent.environment:
-                message = await self.receive(timeout=10)  # Specify the timeout to handle non-blocking receive
+                message = await self.receive()
                 if message:
-                    if "Increase power generation" in message.body:
+                    if "Increase Fossil Fuel power generation" in message.body:
                         self.agent.send_message("power_generator@localhost", "Increase power generation")
-                    elif "Decrease power generation" in message.body:
+                    elif "Decrease Fossil Fuel power generation" in message.body:
                         self.agent.send_message("power_generator@localhost", "Decrease power generation")
 
                     # Handle the response properly if needed
@@ -123,14 +88,14 @@ class PowerGeneratorAgent(SmartGridAgent):
 
     async def increase_power_generation(self):
         if self.balance < 100:
-            self.environment.update_generation(20)
+            self.environment.__update_generation(20)
             self.balance += 2
         else:
             print("Balance is at maximum. Cannot increase power generation further.")
 
     async def decrease_power_generation(self):
         if self.balance > 0:
-            self.environment.update_generation(-20)
+            self.environment.__update_generation(-20)
             self.balance -= 2
         else:
             print("Balance is at minimum. Already not producing energy.")
@@ -146,5 +111,37 @@ class PowerGeneratorAgent(SmartGridAgent):
                         await self.agent.decrease_power_generation()
                 else:
                     print("Power did not receive a message from Grid Controller.")
+            else:
+                print("Error: Environment not set")
+
+
+class NeighborhoodControllerAgent(SmartGridAgent):
+    def __init__(self, jid, password, env):
+        super().__init__(jid, password, env)
+        self.add_behaviour(self.UpdateDemandBehav())
+        self.houses = env.get_houses()
+        self.school = env.get_school()
+        self.hospital = env.get_hospital()
+
+    async def update_demand(self, demand):
+        current_demand = self.environment.get_demand()
+        if current_demand + demand >= 0:
+            self.environment.update_demand(demand)
+        else:
+            print("Error: Cannot reduce demand below 0.")
+
+    class UpdateDemandBehav(OneShotBehaviour):
+        async def run(self):
+            if self.agent.environment:
+                message = await self.receive(timeout=60)  # Specify the timeout to handle non-blocking receive
+                if message:
+                    if "Increase demand" in message.body:
+                        await self.agent.update_demand(20)
+                    elif "Decrease demand" in message.body:
+                        await self.agent.update_demand(-20)
+
+                    # Handle the response properly if needed
+                else:
+                    print("Neighborhood did not receive a message from Energy Consumer.")
             else:
                 print("Error: Environment not set")
