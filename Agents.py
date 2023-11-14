@@ -29,7 +29,7 @@ class SmartGridAgent(Agent):
         self.add_behaviour(ReceiveMessageBehaviour())
 
 
-# TODO: CODE BELOW NOT REVISED
+# TODO: CODE BELOW NOT REVISIONED
 
 
 class GridControllerAgent(SmartGridAgent):
