@@ -29,6 +29,39 @@ class SmartGridAgent(Agent):
         self.add_behaviour(ReceiveMessageBehaviour())
 
 
+class NeighborhoodControllerAgent(SmartGridAgent):
+    def __init__(self, jid, password, env):
+        super().__init__(jid, password, env)
+        self.add_behaviour(self.UpdateDemandBehav())
+        self.neighborhood = env.get_neighborhoods()
+
+    async def update_demand(self, demand):
+        current_demand = self.environment.get_demand()
+        if current_demand + demand >= 0:
+            self.environment.update_demand(demand)
+        else:
+            print("Error: Cannot reduce demand below 0.")
+
+    class UpdateDemandBehav(OneShotBehaviour):
+        async def run(self):
+            if self.agent.environment:
+                message = await self.receive(timeout=60)  # Specify the timeout to handle non-blocking receive
+                if message:
+                    if "Increase demand" in message.body:
+                        await self.agent.update_demand(20)
+                    elif "Decrease demand" in message.body:
+                        await self.agent.update_demand(-20)
+
+                    # Handle the response properly if needed
+                else:
+                    print("Neighborhood did not receive a message from Energy Consumer.")
+            else:
+                print("Error: Environment not set")
+
+
+# TODO: CODE BELOW NOT REVISIONED
+
+
 class GridControllerAgent(SmartGridAgent):
     def __init__(self, jid, password, environment):
         super().__init__(jid, password, environment)
@@ -111,37 +144,5 @@ class PowerGeneratorAgent(SmartGridAgent):
                         await self.agent.decrease_power_generation()
                 else:
                     print("Power did not receive a message from Grid Controller.")
-            else:
-                print("Error: Environment not set")
-
-
-class NeighborhoodControllerAgent(SmartGridAgent):
-    def __init__(self, jid, password, env):
-        super().__init__(jid, password, env)
-        self.add_behaviour(self.UpdateDemandBehav())
-        self.houses = env.get_houses()
-        self.school = env.get_school()
-        self.hospital = env.get_hospital()
-
-    async def update_demand(self, demand):
-        current_demand = self.environment.get_demand()
-        if current_demand + demand >= 0:
-            self.environment.update_demand(demand)
-        else:
-            print("Error: Cannot reduce demand below 0.")
-
-    class UpdateDemandBehav(OneShotBehaviour):
-        async def run(self):
-            if self.agent.environment:
-                message = await self.receive(timeout=60)  # Specify the timeout to handle non-blocking receive
-                if message:
-                    if "Increase demand" in message.body:
-                        await self.agent.update_demand(20)
-                    elif "Decrease demand" in message.body:
-                        await self.agent.update_demand(-20)
-
-                    # Handle the response properly if needed
-                else:
-                    print("Neighborhood did not receive a message from Energy Consumer.")
             else:
                 print("Error: Environment not set")
