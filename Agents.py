@@ -29,6 +29,12 @@ class SmartGridAgent(Agent):
         self.add_behaviour(ReceiveMessageBehaviour())
 
 
+class TestingAgent(SmartGridAgent):
+    def __init__(self, jid, password, env):
+        super().__init__(jid, password, env)
+        self.neighborhood = env.get_neighborhoods()
+
+
 class NeighborhoodControllerAgent(SmartGridAgent):
     def __init__(self, jid, password, env):
         super().__init__(jid, password, env)

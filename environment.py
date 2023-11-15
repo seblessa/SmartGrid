@@ -9,7 +9,7 @@ class SmartGridEnvironment:
         self.current_time = (1, "Monday", "day")
         self.generation = 0
 
-        self.neighborhoods = [Neighborhood() for _ in range(random.randint(3, 5))]
+        self.neighborhoods = [Neighborhood() for _ in range(random.randint(3, 7))]
         self.hospitals = [Hospital(sum([neighborhood.get_houses_demand() for neighborhood in self.neighborhoods]))
                           for _ in range((len(self.neighborhoods) // 3) + 1)]
         self.policeDepartments = [PoliceDepartment(self.neighborhoods) for _ in
@@ -20,7 +20,7 @@ class SmartGridEnvironment:
         self.WindEnergyStations = [WindEnergyStation() for _ in range(random.randint(3, 5))]
         self.windGeneration = sum(windStation.generation for windStation in self.WindEnergyStations)
 
-        self.SolarEnergyStations = [SolarEnergyStation() for _ in range(random.randint(50, 100))]
+        self.SolarEnergyStations = [SolarEnergyStation() for _ in range(random.randint(20, 40))]
         self.solarGeneration = sum(solarStation.generation for solarStation in self.SolarEnergyStations)
 
         self.HydroEnergyStation = HydroEnergyStation()
@@ -31,10 +31,15 @@ class SmartGridEnvironment:
 
         self.generation = self.windGeneration + self.solarGeneration + self.hydroGeneration + self.fossilFuelGeneration
 
+    def get_name(self):
+        return self.city_name
+
     def __update_demand(self):
         demand = 0
         for neighborhood in self.neighborhoods:
             demand += neighborhood.get_demand()
+        for hospital in self.hospitals:
+            demand += hospital.get_demand()
         for police in self.policeDepartments:
             demand += police.get_demand()
         for fire in self.fireDepartments:
@@ -61,7 +66,20 @@ class SmartGridEnvironment:
         self.fossilFuelGeneration = self.FossilFuelEnergyStation.get_generation()
 
         self.generation = self.windGeneration + self.solarGeneration + self.hydroGeneration + self.fossilFuelGeneration
+        generation = self.generation
 
+        def update(structs):
+            for struct in structs:
+                min_gen = min(struct.get_demand(), self.generation)
+                self.generation = max(0, generation - min_gen)
+                struct.update_generation(min_gen)
+
+        update(self.hospitals)
+        update(self.policeDepartments)
+        update(self.fireDepartments)
+        update(self.neighborhoods)
+
+        self.generation = generation
 
     def update_time(self):
         day, weekday, day_or_night = self.current_time
@@ -92,6 +110,30 @@ class SmartGridEnvironment:
 
     def get_fire_department(self):
         return self.fireDepartments
+
+    def get_solar_generation(self):
+        return self.solarGeneration
+
+    def get_solar_stations(self):
+        return self.SolarEnergyStations
+
+    def get_hydro_generation(self):
+        return self.hydroGeneration
+
+    def get_hydro_station(self):
+        return self.HydroEnergyStation
+
+    def get_wind_generation(self):
+        return self.windGeneration
+
+    def get_wind_stations(self):
+        return self.WindEnergyStations
+
+    def get_ff_generation(self):
+        return self.fossilFuelGeneration
+
+    def get_ff_station(self):
+        return self.FossilFuelEnergyStation
 
     def get_status(self):
         return self.demand, self.generation, self.get_demand() - self.get_generation()
