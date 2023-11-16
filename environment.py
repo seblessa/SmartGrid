@@ -9,7 +9,7 @@ class SmartGridEnvironment:
         self.current_time = (1, "Monday", "day")
         self.generation = 0
 
-        self.neighborhoods = [Neighborhood() for _ in range(random.randint(3, 7))]
+        self.neighborhoods = [Neighborhood() for _ in range(random.randint(3, 6))]
         self.hospitals = [Hospital(sum([neighborhood.get_houses_demand() for neighborhood in self.neighborhoods]))
                           for _ in range((len(self.neighborhoods) // 3) + 1)]
         self.policeDepartments = [PoliceDepartment(self.neighborhoods) for _ in
@@ -17,10 +17,10 @@ class SmartGridEnvironment:
         self.fireDepartments = [FireDepartment(self.neighborhoods) for _ in range((len(self.neighborhoods) // 4) + 1)]
         self.demand = self.__update_demand()
 
-        self.WindEnergyStations = [WindEnergyStation() for _ in range(random.randint(3, 5))]
+        self.WindEnergyStations = [WindEnergyStation() for _ in range(random.randint(3, 8))]
         self.windGeneration = sum(windStation.generation for windStation in self.WindEnergyStations)
 
-        self.SolarEnergyStations = [SolarEnergyStation() for _ in range(random.randint(20, 40))]
+        self.SolarEnergyStations = [SolarEnergyStation() for _ in range(random.randint(25, 50))]
         self.solarGeneration = sum(solarStation.generation for solarStation in self.SolarEnergyStations)
 
         self.HydroEnergyStation = HydroEnergyStation()

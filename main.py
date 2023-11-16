@@ -1,9 +1,13 @@
+import math
+
 from environment import SmartGridEnvironment
+import contextlib
+
+with contextlib.redirect_stdout(None):
+    import pygame
 from Agents import *
-import pygame
 import random
 import spade
-
 
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
@@ -25,7 +29,7 @@ async def main():
     pygame.display.set_caption(city.get_name())
     clock = pygame.time.Clock()
     while True:
-        # print(city)
+        print(city)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -50,31 +54,46 @@ def draw_city(city):
     time_text = font.render(f"Day: {current_time[0]}, {current_time[1]} during the {current_time[2]}", True, BLACK)
     screen.blit(time_text, (500, 10))
 
-    # Draw hospitals, police departments, and fire departments in lines
+    # Draw text box for current Balance
+    x = int(screen_size[0] - 250)
+    y = int(50)
+    text_rect = pygame.Rect(x, y, 175, 60)
+    pygame.draw.rect(screen, BLACK, text_rect, 2)  # Draw edges
+    font = pygame.font.Font(None, 40)
+    solar_text = font.render("Balance:", True, BLACK)
+    gen_text = font.render(f"{city.get_balance()}", True, BLACK)
+    screen.blit(solar_text, (x + 20, y + 5))
+    screen.blit(gen_text, (x + 20, y + 25))
+
+    # Draw hospitals, police departments, and fire departments randomly in the middle of the screen in a box
     for i, structure_list in enumerate(
             [city.get_hospitals(), city.get_police_department(), city.get_fire_department()]):
-        x = int(screen_size[0] / 2 - 110)
-        y = int(screen_size[1] / 2 - 75 + i * 60)  # Adjusted y-coordinate for lines
-
         for j, structure in enumerate(structure_list):
-            structure_rect = pygame.Rect(x + j * 100, y, 50, 50)  # Adjusted x-coordinate for lines
+            base_radius = 50
+            radius = base_radius * (j + i + 1)
+            angle = random.uniform(0, 2 * math.pi)
+            x = screen_size[0] // 2 + int(radius * math.cos(angle))
+            y = screen_size[1] // 2 + int(radius * math.sin(angle))
+
+            # Draw structure with more space in the box without colliding
+            structure_rect = pygame.Rect(x, y, 50, 50)
             pygame.draw.rect(screen, BLACK, structure_rect, 2)  # Draw edges
-            pygame.draw.circle(screen, GREEN if structure.online else RED, (x + 25 + j * 100, y + 25), 5)
+            pygame.draw.circle(screen, GREEN if structure.online else RED, (x + 25, y + 25), 5)
 
             font = pygame.font.Font(None, 15)
             demand_text = font.render(f"D: {structure.get_demand()}", True, BLACK)
             gen_text = font.render(f"G: {structure.get_generation()}", True, BLACK)
-            screen.blit(demand_text, (x + j * 100, y + 50))
-            screen.blit(gen_text, (x + j * 100, y + 60))
+            screen.blit(demand_text, (x, y + 50))
+            screen.blit(gen_text, (x, y + 60))
 
             # Add text label to the right of the squares
             name_text = font.render(f"{('Hospital', 'Police', 'Fire')[i]}", True, BLACK)  # Replace with actual names
-            screen.blit(name_text, (x + 50 + j * 100, y + 25))
+            screen.blit(name_text, (x + 50, y + 25))
 
     # Draw neighborhoods
     for i, neighborhood in enumerate(city.get_neighborhoods()):
         x = int(screen_size[0] / 2 + 400 * pygame.math.Vector2(1, 0).rotate(i * 360 / len(city.get_neighborhoods())).x)
-        y = int(screen_size[1] / 2 + 300 * pygame.math.Vector2(1, 0).rotate(i * 360 / len(city.get_neighborhoods())).y)
+        y = int(screen_size[1] / 2 + 250 * pygame.math.Vector2(1, 0).rotate(i * 360 / len(city.get_neighborhoods())).y)
 
         # Draw houses in the neighborhood
         num_houses = len(neighborhood.houses)
@@ -120,7 +139,7 @@ def draw_city(city):
         screen.blit(demand_text, (x - 30, y - 30))
         screen.blit(gen_text, (x - 30, y - 20))
 
-    # Draw energy generation stations as triangles in a grid in the top left corner
+    # Draw solar panel
     solar_stations = city.get_solar_stations()
     solar_grid_size = int(len(solar_stations) ** 0.5)  # Calculate grid size for solar panels
     for i, station in enumerate(solar_stations):
@@ -147,26 +166,27 @@ def draw_city(city):
     screen.blit(solar_text, (x + 20, y + 5))
     screen.blit(gen_text, (x + 20, y + 25))
 
+    # Draw wind stations
     for i, station in enumerate(city.get_wind_stations()):
-        x = int(screen_size[0] / 1.2 + 150 * i)  # Adjusted the x-coordinate for a line
-        y = int(screen_size[1] / 10)
+        x = int(screen_size[0] - 100)  # Adjusted the x-coordinate for a line
+        y = int(screen_size[1] - (100 + 100 * i))
 
         # Draw triangle for wind station
-        station_points = [(x - 15, y + 15), (x + 15, y + 15), (x, y - 15)]
+        station_points = [(x - 30, y + 30), (x + 30, y + 30), (x, y - 30)]
         pygame.draw.polygon(screen, BLACK, station_points, 2)  # Draw edges
         pygame.draw.circle(screen, GREEN if station.generation > 0 else RED, (x, y - 15), 5)
 
         font = pygame.font.Font(None, 15)
-        station_name_text = font.render("Wind Station", True, BLACK)
+        station_name_text = font.render(f"Wind Station {i+1}", True, BLACK)
         screen.blit(station_name_text, (x - 25, y + 20))
 
-    # Draw hydro station as a triangle in the line to the right of wind stations
+    # Draw hydro station
     hydro_stations = city.get_hydro_station()
     if hydro_stations:
-        x = int(screen_size[0] / 1.2 + 150)
-        y = int((screen_size[1] / 10) + 100)
+        x = int(screen_size[0] - 200)
+        y = int(screen_size[1] - 200)
         # Draw triangle for hydro station
-        station_points = [(x - 15, y + 15), (x + 15, y + 15), (x, y - 15)]
+        station_points = [(x - 30, y + 30), (x + 30, y + 30), (x, y - 30)]
         pygame.draw.polygon(screen, BLACK, station_points, 2)  # Draw edges
         pygame.draw.circle(screen, GREEN if hydro_stations.generation > 0 else RED, (x, y - 15), 5)
 
@@ -174,13 +194,13 @@ def draw_city(city):
         station_name_text = font.render("Hydro Station", True, BLACK)
         screen.blit(station_name_text, (x - 25, y + 20))
 
-    # Draw fossil fuel station as a triangle in the line to the right of hydro station
+    # Draw fossil fuel station
     fossil_fuel_stations = city.get_ff_station()
     if fossil_fuel_stations:
-        x = int(screen_size[0] / 1.2 + 150)
-        y = int((screen_size[1] / 10) + 200)
+        x = int(screen_size[0] - 200)
+        y = int(screen_size[1] - 100)
         # Draw triangle for fossil fuel station
-        station_points = [(x - 15, y + 15), (x + 15, y + 15), (x, y - 15)]
+        station_points = [(x - 30, y + 30), (x + 30, y + 30), (x, y - 30)]
         pygame.draw.polygon(screen, BLACK, station_points, 2)  # Draw edges
         pygame.draw.circle(screen, GREEN if fossil_fuel_stations.generation > 0 else RED, (x, y - 15), 5)
 
