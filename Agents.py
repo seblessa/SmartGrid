@@ -1,99 +1,202 @@
+import asyncio
+
 from spade.agent import Agent
 from spade.behaviour import OneShotBehaviour, CyclicBehaviour
 from spade.message import Message
 
 
-class SmartGridAgent(Agent):
+class WindEnergyController(Agent):
     def __init__(self, jid, password, env):
         super().__init__(jid, password)
-        self.environment = env
+        self.env = env
 
-    def get_env(self):
-        return self.environment
+    async def setup(self):
+        # print("WindEnergyController started")
+        b = self.SendGeneration()
+        self.add_behaviour(b)
 
-    def send_message(self, receiver, message):
-        class SendMessageBehaviour(OneShotBehaviour):
-            async def run(self):
-                msg = Message(to=receiver)
-                msg.body = message
-                await self.send(msg)
+        await super().setup()
 
-        self.add_behaviour(SendMessageBehaviour())
+    class SendGeneration(CyclicBehaviour):
+        def get_wind_generation(self):
+            for wind_station in self.agent.env.get_wind_stations():
+                wind_station.refresh()
+            return sum([wind_station.get_generation() for wind_station in self.agent.env.get_wind_stations()])
 
-    def receive_message(self):
-        class ReceiveMessageBehaviour(CyclicBehaviour):
-            async def run(self):
-                msg = await self.receive()
-                print(f"Received message: {msg.body}")
-
-        self.add_behaviour(ReceiveMessageBehaviour())
-
-
-class TestingAgent(SmartGridAgent):
-    def __init__(self, jid, password, env):
-        super().__init__(jid, password, env)
-        self.neighborhood = env.get_neighborhoods()
-
-
-class NeighborhoodControllerAgent(SmartGridAgent):
-    def __init__(self, jid, password, env):
-        super().__init__(jid, password, env)
-        self.add_behaviour(self.UpdateDemandBehav())
-        self.neighborhood = env.get_neighborhoods()
-
-    async def update_demand(self, demand):
-        current_demand = self.environment.get_demand()
-        if current_demand + demand >= 0:
-            self.environment.update_demand(demand)
-        else:
-            print("Error: Cannot reduce demand below 0.")
-
-    class UpdateDemandBehav(OneShotBehaviour):
         async def run(self):
-            if self.agent.environment:
-                message = await self.receive(timeout=60)  # Specify the timeout to handle non-blocking receive
-                if message:
-                    if "Increase demand" in message.body:
-                        await self.agent.update_demand(20)
-                    elif "Decrease demand" in message.body:
-                        await self.agent.update_demand(-20)
+            # print("Sending green generation produced!")
+            msg = Message(to="green_power_generator@localhost")  # Instantiate the message
+            msg.set_metadata("performative", "inform")  # Set the "inform" FIPA performative
+            msg.body = str(self.get_wind_generation())  # Set the message content
 
-                    # Handle the response properly if needed
+            await self.send(msg)
+            await asyncio.sleep(3)
+            # print("Message sent!")
+
+
+class SolarEnergyController(Agent):
+    def __init__(self, jid, password, env):
+        super().__init__(jid, password)
+        self.env = env
+
+    async def setup(self):
+        # print("SolarEnergyController started")
+        b = self.SendGeneration()
+        self.add_behaviour(b)
+
+        await super().setup()
+
+    class SendGeneration(CyclicBehaviour):
+        def get_solar_generation(self):
+            for solar_station in self.agent.env.get_solar_stations():
+                solar_station.refresh(self.agent.env.get_time())
+            return sum([solar_station.get_generation() for solar_station in self.agent.env.get_solar_stations()])
+
+        async def run(self):
+            # print("Sending green generation produced!")
+            msg = Message(to="green_power_generator@localhost")  # Instantiate the message
+            msg.set_metadata("performative", "inform")  # Set the "inform" FIPA performative
+            msg.body = str(self.get_solar_generation())  # Set the message content
+
+            await self.send(msg)
+            await asyncio.sleep(3)
+            # print("Message sent!")
+
+
+class HydroEnergyController(Agent):
+    def __init__(self, jid, password, env):
+        super().__init__(jid, password)
+        self.env = env
+
+    async def setup(self):
+        # print("HydroEnergyController started")
+        b = self.SendGeneration()
+        self.add_behaviour(b)
+
+        await super().setup()
+
+    class SendGeneration(CyclicBehaviour):
+        def get_hydro_generation(self):
+            self.agent.env.get_hydro_station().refresh()
+            return self.agent.env.get_hydro_station().get_generation()
+
+        async def run(self):
+            # print("Sending green generation produced!")
+            msg = Message(to="green_power_generator@localhost")  # Instantiate the message
+            msg.set_metadata("performative", "inform")  # Set the "inform" FIPA performative
+            msg.body = str(self.get_hydro_generation())  # Set the message content
+
+            await self.send(msg)
+            await asyncio.sleep(3)
+            # print("Message sent!")
+
+
+class GreenPowerControllerAgent(Agent):
+    def __init__(self, jid, password, env):
+        super().__init__(jid, password)
+        self.env = env
+        self.__wind_generation = 0
+        self.__solar_generation = 0
+        self.__hydro_generation = 0
+
+    def get_wind_generation(self):
+        return self.__wind_generation
+
+    def set_wind_generation(self, wind_generation):
+        self.__wind_generation = wind_generation
+
+    def get_solar_generation(self):
+        return self.__solar_generation
+
+    def set_solar_generation(self, solar_generation):
+        self.__solar_generation = solar_generation
+
+    def get_hydro_generation(self):
+        return self.__hydro_generation
+
+    def set_hydro_generation(self, hydro_generation):
+        self.__hydro_generation = hydro_generation
+
+    async def setup(self):
+        # print("GreenPowerControllerAgent started")
+
+        wind_controller = WindEnergyController("wind_energy_generator@localhost", "SmartGrid", self.env)
+        solar_controller = SolarEnergyController("solar_energy_generator@localhost", "SmartGrid", self.env)
+        hydro_controller = HydroEnergyController("hydro_energy_generator@localhost", "SmartGrid", self.env)
+
+        await asyncio.gather(
+            wind_controller.start(),
+            solar_controller.start(),
+            hydro_controller.start()
+        )
+
+        self.add_behaviour(self.SendGeneration())
+        self.add_behaviour(self.ReceivingMessages())
+
+        # Call the setup method of the superclass
+        await super().setup()
+
+    class ReceivingMessages(CyclicBehaviour):
+        async def run(self):
+            message = await self.receive()
+            if message:
+                message_author = str(message.sender)
+                if message_author == "wind_energy_generator@localhost":
+                    received_integer = int(message.body)
+                    self.agent.set_wind_generation(received_integer)
+                elif message_author == "solar_energy_generator@localhost":
+                    received_integer = int(message.body)
+                    self.agent.set_solar_generation(received_integer)
+                elif message_author == "hydro_energy_generator@localhost":
+                    received_integer = int(message.body)
+                    self.agent.set_hydro_generation(received_integer)
                 else:
-                    print("Neighborhood did not receive a message from Energy Consumer.")
-            else:
-                print("Error: Environment not set")
+                    print(f"Received '{message.body}' message from: {message_author}.")
+
+    class SendGeneration(CyclicBehaviour):
+        def get_green_generation(self):
+            return int(self.agent.get_wind_generation()) + int(self.agent.get_solar_generation()) + int(
+                self.agent.get_hydro_generation())
+
+        async def run(self):
+            # print("Sending green generation produced!")
+            msg = Message(to="grid_controller@localhost")  # Instantiate the message
+            msg.set_metadata("performative", "inform")  # Set the "inform" FIPA performative
+            msg.body = str(self.get_green_generation())  # Set the message content
+
+            await self.send(msg)
+            await asyncio.sleep(3)
+            # print("Message sent!")
+
+
+class GridControllerAgent(Agent):
+    def __init__(self, jid, password, env):
+        super().__init__(jid, password)
+        self.env = env
+
+    async def setup(self):
+        # print("GridControllerAgent started")
+        b = self.ReceivingMessages()
+        self.add_behaviour(b)
+
+        await super().setup()
+
+    class ReceivingMessages(CyclicBehaviour):
+        async def run(self):
+            message = await self.receive()
+            if message:
+                message_author = str(message.sender)
+                if message_author == "green_power_generator@localhost":
+                    received_integer = int(message.body)
+                    self.agent.env.set_green_generation(received_integer)
+                else:
+                    print(f"Received '{message.body}' message from: {message_author}.")
 
 
 # TODO: CODE BELOW NOT REVISIONED
 
 
-class GridControllerAgent(SmartGridAgent):
-    def __init__(self, jid, password, environment):
-        super().__init__(jid, password, environment)
-        self.add_behaviour(self.LoadBalancingBehav())
-
-    async def get_status(self):
-        return self.environment.get_status()
-
-    class LoadBalancingBehav(CyclicBehaviour):
-        async def run(self):
-            if self.agent.environment:
-                message = await self.receive()
-                if message:
-                    if "Increase Fossil Fuel power generation" in message.body:
-                        self.agent.send_message("power_generator@localhost", "Increase power generation")
-                    elif "Decrease Fossil Fuel power generation" in message.body:
-                        self.agent.send_message("power_generator@localhost", "Decrease power generation")
-
-                    # Handle the response properly if needed
-                else:
-                    print("Grid did not receive a message from Energy Consumer.")
-            else:
-                print("Error: Environment not set")
-
-
-class EnergyConsumerAgent(SmartGridAgent):
+class EnergyConsumerAgent(Agent):
     def __init__(self, jid, password, environment):
         super().__init__(jid, password, environment)
         self.add_behaviour(self.ConsumeEnergyBehav())
@@ -119,36 +222,31 @@ class EnergyConsumerAgent(SmartGridAgent):
                 print("Error: Environment not set")
 
 
-class PowerGeneratorAgent(SmartGridAgent):
-    def __init__(self, jid, password, environment):
-        super().__init__(jid, password, environment)
-        self.balance = 0
-        self.add_behaviour(self.PowerGenerationBehav())
+class NeighborhoodControllerAgent(Agent):
+    def __init__(self, jid, password, env):
+        super().__init__(jid, password, env)
+        self.add_behaviour(self.UpdateDemandBehav())
+        self.neighborhood = env.get_neighborhoods()
 
-    async def increase_power_generation(self):
-        if self.balance < 100:
-            self.environment.__update_generation(20)
-            self.balance += 2
+    async def update_demand(self, demand):
+        current_demand = self.environment.get_demand()
+        if current_demand + demand >= 0:
+            self.environment.update_demand(demand)
         else:
-            print("Balance is at maximum. Cannot increase power generation further.")
+            print("Error: Cannot reduce demand below 0.")
 
-    async def decrease_power_generation(self):
-        if self.balance > 0:
-            self.environment.__update_generation(-20)
-            self.balance -= 2
-        else:
-            print("Balance is at minimum. Already not producing energy.")
-
-    class PowerGenerationBehav(OneShotBehaviour):
+    class UpdateDemandBehav(OneShotBehaviour):
         async def run(self):
             if self.agent.environment:
-                message = await self.receive(timeout=10)  # Specify the timeout to handle non-blocking receive
+                message = await self.receive(timeout=60)  # Specify the timeout to handle non-blocking receive
                 if message:
-                    if "Increase power generation" in message.body:
-                        await self.agent.increase_power_generation()
-                    elif "Decrease power generation" in message.body:
-                        await self.agent.decrease_power_generation()
+                    if "Increase demand" in message.body:
+                        await self.agent.update_demand(20)
+                    elif "Decrease demand" in message.body:
+                        await self.agent.update_demand(-20)
+
+                    # Handle the response properly if needed
                 else:
-                    print("Power did not receive a message from Grid Controller.")
+                    print("Neighborhood did not receive a message from Energy Consumer.")
             else:
                 print("Error: Environment not set")

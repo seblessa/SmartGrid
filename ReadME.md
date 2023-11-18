@@ -12,7 +12,10 @@
 |-----------------------------------------|-------------|
 | `admin@localhost`                       | `SmartGrid` | 
 | `grid_controller@localhost`             | `SmartGrid` |
-| `power_generator@localhost`             | `SmartGrid` |
+| `green_power_generator@localhost`       | `SmartGrid` |
+| `wind_energy_generator@localhost`       | `SmartGrid` |
+| `solar_energy_generator@localhost`      | `SmartGrid` |
+| `hydro_energy_generator@localhost`      | `SmartGrid` |
 | `energy_consumer@localhost`             | `SmartGrid` |
 | `NeighborhoodControllerAgent@localhost` | `SmartGrid` |
 

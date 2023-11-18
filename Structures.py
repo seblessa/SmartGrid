@@ -10,10 +10,10 @@ class Structure:
         self.online = False
 
     def get_demand(self):
-        return self.demand
+        return int(self.demand)
 
     def get_generation(self):
-        return self.generation
+        return int(self.generation)
 
     def update_generation(self, energy):
         self.generation += energy
@@ -52,7 +52,7 @@ class School(Structure):
 
 class Neighborhood:
     def __init__(self):
-        houses = [House(random.randint(2, 7)) for _ in range(random.randint(8, 12))]
+        houses = [House(random.randint(2, 7)) for _ in range(random.randint(5, 11))]
         self.houses = houses
         self.school = School(houses)
         self.generation = 0
@@ -130,7 +130,7 @@ class WindEnergyStation:
         self.current_condition_index = 1
 
     def get_generation(self):
-        return self.generation
+        return int(self.generation)
 
     def refresh(self):
         previous_index = max(0, self.current_condition_index - 1)
@@ -165,7 +165,7 @@ class SolarEnergyStation:
         self.generation = 100
 
     def get_generation(self):
-        return self.generation
+        return int(self.generation)
 
     def refresh(self, time):
         day, weekday, day_or_night = time
@@ -180,7 +180,7 @@ class HydroEnergyStation:
         self.generation = 25000
 
     def get_generation(self):
-        return self.generation
+        return int(self.generation)
 
     def refresh(self):
         values = [250, 1000, 5750, 12500, 18000, 25000, 31500]
@@ -193,7 +193,7 @@ class FossilFuelEnergyStation:
         self.generation = 0
 
     def get_generation(self):
-        return self.generation
+        return int(self.generation)
 
     def increase_generation(self, increase_value):
         self.generation += increase_value
