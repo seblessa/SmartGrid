@@ -14,15 +14,15 @@ class SmartGridEnvironment:
         self.fireDepartment = FireDepartment(self.neighborhoods)
         self.demand = self.__update_demand()  # TODO - exchange with a setter method activated by an agent
 
-        self.__WindEnergyStations = [WindEnergyStation() for _ in range(random.randint(3, 7))]
-        self.__SolarEnergyStations = [SolarEnergyStation() for _ in range(random.choice([16, 25, 36, 49, 64]))]
+        self.__WindTurbines = [WindTurbine() for _ in range(random.randint(3, 7))]
+        self.__wind_generation = 0
+        self.__SolarPanels = [SolarPanel() for _ in range(random.choice([16, 25, 36, 49, 64]))]
+        self.__solar_generation = 0
         self.__HydroEnergyStation = HydroEnergyStation()
+        self.__hydro_generation = 0
+
         self.FossilFuelEnergyStation = FossilFuelEnergyStation()
-
         self.__fossilFuelGeneration = self.FossilFuelEnergyStation.get_generation()
-
-        self.fossilFuelGeneration = self.FossilFuelEnergyStation.get_generation()
-        self.__green_generation = 0
 
     # TODO - functions to keep {
     def get_name(self):
@@ -40,24 +40,70 @@ class SmartGridEnvironment:
             self.current_time = (day + 1, days_of_week[(days_of_week.index(weekday) + 1) % len(days_of_week)], "day")
         # self.__update_generation(self.current_time)
 
-    def get_wind_stations(self):
-        return self.__WindEnergyStations
+    def get_wind_turbine(self):
+        return self.__WindTurbines
 
-    def get_solar_stations(self):
-        return self.__SolarEnergyStations
+    def get_solar_panels(self):
+        return self.__SolarPanels
 
-    def get_hydro_station(self):
+    def get_hydro_generator(self):
         return self.__HydroEnergyStation
 
-    def set_green_generation(self, green_generation):
-        self.__green_generation = green_generation
+    def set_wind_generation(self, wind_generation):
+        self.__wind_generation = wind_generation
 
-    # TODO - }
+    def set_solar_generation(self, solar_generation):
+        self.__solar_generation = solar_generation
 
-    # TODO - DELETE AFTER {
+    def set_hydro_generation(self, hydro_generation):
+        self.__hydro_generation = hydro_generation
 
     def get_green_generation(self):
-        return self.__green_generation
+        return self.__wind_generation + self.__solar_generation + self.__hydro_generation
+
+    def get_balance(self):
+        return self.get_green_generation() + self.__fossilFuelGeneration - self.demand
+
+    def update_generation(self):
+        for windEnergyStation in self.__WindTurbines:
+            windEnergyStation.refresh()
+        for solarEnergyStation in self.__SolarPanels:
+            solarEnergyStation.refresh(self.current_time)
+        self.__HydroEnergyStation.refresh()
+
+    def __str__(self):
+        neighborhood_strings = [f'Neighborhood {i + 1} - Demand={neighborhood.get_demand()}' for i, neighborhood in
+                                enumerate(self.neighborhoods)]
+        hospital_strings = [f'Hospital - Demand={self.hospital.get_demand()}']
+        police_strings = [f'Police Department - Demand={self.policeDepartment.get_demand()}']
+        fire_string = [f'Fire Department - Demand={self.fireDepartment.get_demand()}']
+        total_demand = sum(neighborhood.get_demand() for neighborhood in
+                           self.neighborhoods) + self.hospital.get_demand() + self.policeDepartment.get_demand() + self.fireDepartment.get_demand()
+
+        windStation_string = [f'Wind Station {i + 1} - Generation={wind.get_generation()}' for i, wind in
+                              enumerate(self.__WindTurbines)]
+        solarStation_string = [f'{len(self.__SolarPanels)} solar panels - Generation={self.__solar_generation}']
+        hydroStation_string = [f'Hydro Station - Generation={self.__wind_generation}']
+        ffStation_string = [f'Fossil Fuel - Generation={self.__fossilFuelGeneration}']
+
+        total_generation = self.get_green_generation() + self.__fossilFuelGeneration
+
+        return ('\n'*1+ f'{self.city_name}:\n' +
+                f'Day {self.current_time[0]}, {self.current_time[1]} during the {self.current_time[2]}\n\n' +
+                '\n'.join(neighborhood_strings) + '\n' +
+                '\n'.join(hospital_strings) + '\n' +
+                '\n'.join(police_strings) + '\n' +
+                '\n'.join(fire_string) + '\n' +
+                f'\nTotal Demand = {total_demand}\n\n' +
+                '\n'.join(windStation_string) + '\n' +
+                '\n'.join(solarStation_string) + '\n' +
+                '\n'.join(hydroStation_string) + '\n' +
+                '\n'.join(ffStation_string) + '\n' +
+                f'\nTotal Generation = {total_generation}\n\n' +
+                f'Balance = {self.get_balance()}'+'\n')
+
+    def get_solar_generation(self):
+        return self.__solar_generation
 
     # TODO - }
 
@@ -70,50 +116,8 @@ class SmartGridEnvironment:
         demand += self.fireDepartment.get_demand()
         return demand
 
-    def __update_generation(self, current_time):
-        self.windGeneration = 0
-        self.solarGeneration = 0
-        self.hydroGeneration = 0
-        self.fossilFuelGeneration = 0
-
-        for windEnergyStation in self.WindEnergyStations:
-            windEnergyStation.refresh()
-            self.windGeneration += windEnergyStation.get_generation()
-        for solarEnergyStation in self.SolarEnergyStations:
-            solarEnergyStation.refresh(current_time)
-            self.solarGeneration += solarEnergyStation.get_generation()
-
-        self.HydroEnergyStation.refresh()
-        self.hydroGeneration = self.HydroEnergyStation.get_generation()
-
-        self.FossilFuelEnergyStation.get_generation()
-        self.fossilFuelGeneration = self.FossilFuelEnergyStation.get_generation()
-
-        self.green_generation = self.windGeneration + self.solarGeneration + self.hydroGeneration
-        green_generation = self.green_generation
-
-        min_gen = min(self.hospital.get_demand(), green_generation)
-        green_generation = max(0, green_generation - min_gen)
-        self.hospital.update_generation(min_gen)
-
-        min_gen = min(self.policeDepartment.get_demand(), green_generation)
-        green_generation = max(0, green_generation - min_gen)
-        self.policeDepartment.update_generation(min_gen)
-
-        min_gen = min(self.fireDepartment.get_demand(), green_generation)
-        green_generation = max(0, green_generation - min_gen)
-        self.fireDepartment.update_generation(min_gen)
-
-        for neighborhood in self.neighborhoods:
-            min_gen = min(neighborhood.get_demand(), green_generation)
-            green_generation = max(0, green_generation - min_gen)
-            neighborhood.update_generation(min_gen)
-
     def get_demand(self):
         return self.demand
-
-    def get_balance(self):
-        return self.__green_generation + self.__fossilFuelGeneration - self.demand
 
     def get_neighborhoods(self):
         return self.neighborhoods
@@ -127,9 +131,6 @@ class SmartGridEnvironment:
     def get_fire_department(self):
         return self.fireDepartment
 
-    def get_ff_generation(self):
-        return self.fossilFuelGeneration
-
     def get_ff_station(self):
         return self.FossilFuelEnergyStation
 
@@ -138,34 +139,3 @@ class SmartGridEnvironment:
             self.FossilFuelEnergyStation.decrease_generation(self.get_balance())
         else:
             self.FossilFuelEnergyStation.increase_generation(self.get_balance())
-
-    def __str__(self):
-        neighborhood_strings = [f'Neighborhood {i + 1} - Demand={neighborhood.get_demand()}' for i, neighborhood in
-                                enumerate(self.neighborhoods)]
-        hospital_strings = [f'Hospital - Demand={self.hospital.get_demand()}']
-        police_strings = [f'Police Department - Demand={self.policeDepartment.get_demand()}']
-        fire_string = [f'Fire Department - Demand={self.fireDepartment.get_demand()}']
-        total_demand = sum(neighborhood.get_demand() for neighborhood in
-                           self.neighborhoods) + self.hospital.get_demand() + self.policeDepartment.get_demand() + self.fireDepartment.get_demand()
-
-        windStation_string = [f'Wind Station {i + 1} - Generation={wind.get_generation()}' for i, wind in
-                              enumerate(self.WindEnergyStations)]
-        solarStation_string = [f'{len(self.SolarEnergyStations)} solar panels - Generation={self.solarGeneration}']
-        hydroStation_string = [f'Hydro Station - Generation={self.hydroGeneration}']
-        ffStation_string = [f'Fossil Fuel - Generation={self.fossilFuelGeneration}']
-
-        total_generation = (sum(windStation.get_generation() for windStation in self.WindEnergyStations) + sum(
-            solarStation.get_generation() for solarStation in self.SolarEnergyStations) +
-                            self.hydroGeneration + self.fossilFuelGeneration)
-
-        return ('\n'.join(neighborhood_strings) + '\n' +
-                '\n'.join(hospital_strings) + '\n' +
-                '\n'.join(police_strings) + '\n' +
-                '\n'.join(fire_string) + '\n' +
-                f'\nTotal Demand = {total_demand}\n\n' +
-                '\n'.join(windStation_string) + '\n' +
-                '\n'.join(solarStation_string) + '\n' +
-                '\n'.join(hydroStation_string) + '\n' +
-                '\n'.join(ffStation_string) + '\n' +
-                f'\nTotal Generation = {total_generation}\n\n' +
-                f'Balance = {self.get_balance()}')

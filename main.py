@@ -9,53 +9,37 @@ import random
 import spade
 
 
-async def testing():
-    city = SmartGridEnvironment()
-
-    gridController = GridControllerAgent("grid_controller@localhost", "SmartGrid", city)
-
-    greenPowerGeneration = GreenPowerControllerAgent("green_power_generator@localhost", "SmartGrid", city)
-
-    # Start the agents concurrently
-    await asyncio.gather(
-        gridController.start(),
-        greenPowerGeneration.start()
-    )
-
-    greenPowerGeneration.
-
-    while True:
-        # print(city)
-        # print('\n\n\n')
-
-        print(city.get_green_generation())
-
-        await asyncio.sleep(3)
-        city.update_time()
+async def start_agents(agents):
+    for agent in agents:
+        await agent.start()
 
 
 async def main():
     city = SmartGridEnvironment()
 
-    # greenPowerGeneration = GreenPowerControllerAgent("GreenPowerControllerAgent@localhost", "SmartGrid", city)
-    # gridController = GridControllerAgent("GridControllerAgent@localhost", "SmartGrid", city)
+    agents = [
+        GridControllerAgent("grid_controller@localhost", "SmartGrid", city),
+        GreenPowerControllerAgent("green_power_controller@localhost", "SmartGrid", city),
+        WindEnergyController("wind_energy_controller@localhost", "SmartGrid", city),
+        SolarEnergyController("solar_energy_controller@localhost", "SmartGrid", city),
+        HydroEnergyGenerator("hydro_energy_generator@localhost", "SmartGrid", city),
 
-    # await greenPowerGeneration.start()
-    # await gridController.start()
+        TimeAgent("time_agent@localhost", "SmartGrid", city)
+    ]
 
     pygame.init()
     pygame.display.set_caption(city.get_name())
     clock = pygame.time.Clock()
     while True:
-        # print(city)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit(0)
 
+        # print(city)
         draw_city(city)
-        city.update_time()
-        pygame.time.delay(2000)
+        await start_agents(agents)
+
         pygame.display.flip()
         clock.tick(60)
 
@@ -204,7 +188,7 @@ def draw_city(city):
         screen.blit(gen_text, (x - 25, y + 15))
 
     # Draw solar panel
-    solar_stations = city.get_solar_stations()
+    solar_stations = city.get_solar_panels()
     solar_grid_size = int(len(solar_stations) ** 0.5)  # Calculate grid size for solar panels
     for i, station in enumerate(solar_stations):
         row = i // solar_grid_size
@@ -233,7 +217,7 @@ def draw_city(city):
     screen.blit(gen_text, (x + 15 + (solar_grid_size * 30 - gen_text.get_width()) // 2, y + 43))
 
     # Draw wind stations
-    for i, station in enumerate(city.get_wind_stations()):
+    for i, station in enumerate(city.get_wind_turbine()):
         x = int(screen_size[0] - 100)  # Adjusted the x-coordinate for a line
         y = int(screen_size[1] - (100 + 100 * i))
 
@@ -249,7 +233,7 @@ def draw_city(city):
         screen.blit(gen_text, (x - 20, y + 15))
 
     # Draw hydro station
-    hydro_stations = city.get_hydro_station()
+    hydro_stations = city.get_hydro_generator()
     if hydro_stations:
         x = int(screen_size[0] - 200)
         y = int(screen_size[1] - 200)
@@ -284,5 +268,4 @@ def draw_city(city):
 
 
 if __name__ == "__main__":
-    # spade.run(main())
-    spade.run(testing())
+    spade.run(main())

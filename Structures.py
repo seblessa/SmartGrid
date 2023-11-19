@@ -120,9 +120,9 @@ class FireDepartment(Structure):
         return self.demand
 
 
-class WindEnergyStation:
+class WindTurbine:
     def __init__(self):
-        self.generation = 0
+        self.generation = 100
         self.conditions = [
             ("Not generating", 1), ("Not favorable", 10), ("Mildly favorable", 9),
             ("Favorable", 8), ("Very favorable", 7), ("Maximum generation", 6)
@@ -160,7 +160,7 @@ class WindEnergyStation:
             self.generation = 15000
 
 
-class SolarEnergyStation:
+class SolarPanel:
     def __init__(self):
         self.generation = 100
 

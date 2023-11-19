@@ -21,7 +21,7 @@ The aim is to design and implement a multi-agent system to efficiently manage an
 
 ### Week 2-3: Agent Implementation and Environment Modeling
 - [X] Design and implement different types of agents (e.g., Grid Controllers, Generators, Consumers).
-- [ ] Implement basic components of the smart grid environment (power sources, consumers, infrastructure).
+- [X] Implement basic components of the smart grid environment (power sources, consumers, infrastructure).
 - [X] Establish initial communication protocols among agents.
 
 ### Week 4: Advanced Features
