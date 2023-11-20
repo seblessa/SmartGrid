@@ -38,9 +38,9 @@ Time Agent: time_agent@localhost
 | `fossil_fuel_power_generator@localhost` | `SmartGrid` |
 | `green_power_controller@localhost`      | `SmartGrid` |
 | `wind_energy_controller@localhost`      | `SmartGrid` |
-| `wind_energy_generator@localhost`       | `SmartGrid` |
+| `wind_energy_generator@localhost`       | `SmartGrid` | X
 | `solar_energy_controller@localhost`     | `SmartGrid` |
-| `solar_energy_generator@localhost`      | `SmartGrid` |
+| `solar_energy_generator@localhost`      | `SmartGrid` | X
 | `hydro_energy_generator@localhost`      | `SmartGrid` |
 | `energy_controller@localhost`           | `SmartGrid` |
 | `hospital_demander@localhost`           | `SmartGrid` |
@@ -50,7 +50,7 @@ Time Agent: time_agent@localhost
 | `school_demander@localhost`             | `SmartGrid` |
 | `house_demander@localhost`              | `SmartGrid` |
 
-### Functionality of each agent
+### Comunication of each agent
 
 | Agent Name                  | Receives Information from                                                           | Sends Information         |
 |-----------------------------|-------------------------------------------------------------------------------------|---------------------------|

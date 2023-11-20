@@ -4,7 +4,7 @@ import contextlib
 
 with contextlib.redirect_stdout(None):
     import pygame
-from Agents import *
+from agents import *
 import random
 import spade
 
@@ -27,21 +27,23 @@ async def main():
         TimeAgent("time_agent@localhost", "SmartGrid", city)
     ]
 
-    pygame.init()
-    pygame.display.set_caption(city.get_name())
-    clock = pygame.time.Clock()
+    await start_agents(agents)
+
+    # pygame.init()
+    # pygame.display.set_caption(city.get_name())
+    # clock = pygame.time.Clock()
     while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit(0)
+        # for event in pygame.event.get():
+        #    if event.type == pygame.QUIT:
+        #        pygame.quit()
+        #        exit(0)
 
-        # print(city)
-        draw_city(city)
-        await start_agents(agents)
+        # draw_city(city)
+        print(city)
 
-        pygame.display.flip()
-        clock.tick(60)
+
+        # pygame.display.flip()
+        # clock.tick(60)
 
 
 def draw_city(city):

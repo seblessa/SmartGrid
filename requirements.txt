@@ -2,7 +2,7 @@ spade
 osmnx
 geopandas
 matplotlib
-folium>
+folium
 scikit-learn
 cchardet
 pygame

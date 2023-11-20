@@ -177,13 +177,13 @@ class SolarPanel:
 
 class HydroEnergyStation:
     def __init__(self):
-        self.generation = 25000
+        self.generation = 100
 
     def get_generation(self):
         return int(self.generation)
 
     def refresh(self):
-        values = [250, 1000, 5750, 12500, 18000, 25000, 31500]
+        values = [250, 1000, 2500, 5000, 7500, 1000, 12500]
         index = random.randint(0, len(values) - 1)
         self.generation = values[index]
 
