@@ -38,11 +38,10 @@ Time Agent: time_agent@localhost
 | `fossil_fuel_power_generator@localhost` | `SmartGrid` |
 | `green_power_controller@localhost`      | `SmartGrid` |
 | `wind_energy_controller@localhost`      | `SmartGrid` |
-| `wind_energy_generator@localhost`       | `SmartGrid` | X
+| `wind_energy_generator@localhost`       | `SmartGrid` |
 | `solar_energy_controller@localhost`     | `SmartGrid` |
-| `solar_energy_generator@localhost`      | `SmartGrid` | X
+| `solar_energy_generator@localhost`      | `SmartGrid` |
 | `hydro_energy_generator@localhost`      | `SmartGrid` |
-| `energy_controller@localhost`           | `SmartGrid` |
 | `hospital_demander@localhost`           | `SmartGrid` |
 | `fire_station_demander@localhost`       | `SmartGrid` |
 | `police_station_demander@localhost`     | `SmartGrid` |
@@ -62,11 +61,10 @@ Time Agent: time_agent@localhost
 | solar_energy_controller     | `solar_energy_generator`                                                            | `green_power_controller`  |
 | solar_energy_generator      | Doesn't receive information from another agent                                      | `solar_energy_controller` |
 | hydro_energy_generator      | Doesn't receive information from another agent                                      | `green_power_controller`  |
-| energy_controller           | `grid_controller`                                                                   | `grid_controller`         |
-| hospital_demander           | Doesn't receive information from another agent                                      | `energy_controller`       |
-| fire_station_demander       | Doesn't receive information from another agent                                      | `energy_controller`       |
-| police_station_demander     | Doesn't receive information from another agent                                      | `energy_controller`       |
-| neighborhood_controller     | `school_demander`          , `house_demander`                                       | `energy_controller`       |
+| hospital_demander           | Doesn't receive information from another agent                                      | `grid_controller`         |
+| fire_station_demander       | Doesn't receive information from another agent                                      | `grid_controller`         |
+| police_station_demander     | Doesn't receive information from another agent                                      | `grid_controller`         |
+| neighborhood_controller     | `school_demander`          , `house_demander`                                       | `grid_controller`         |
 | school_demander             | Doesn't receive information from another agent                                      | `neighborhood_controller` |
 | house_demander              | Doesn't receive information from another agent                                      | `neighborhood_controller` |
 

@@ -1,8 +1,2 @@
 spade
-osmnx
-geopandas
-matplotlib
-folium
-scikit-learn
-cchardet
 pygame

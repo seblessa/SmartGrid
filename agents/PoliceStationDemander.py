@@ -1,2 +1,0 @@
-class PoliceStationDemander:
-    pass

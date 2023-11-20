@@ -59,7 +59,12 @@ class Neighborhood:
 
     def update_generation(self, energy):
         self.generation = energy
-        self.refresh()
+        for house in self.houses:
+            min_gen = min(house.get_demand(), energy)
+            energy = max(0, energy - min_gen)
+            house.refresh(min_gen)
+        min_gen = min(self.school.get_demand(), energy)
+        self.school.refresh(min_gen)
 
     def get_n_houses(self):
         return len(self.houses)
@@ -72,15 +77,6 @@ class Neighborhood:
 
     def get_demand(self):
         return self.get_houses_demand() + self.get_school_demand()
-
-    def refresh(self):
-        generation = self.generation
-        for house in self.houses:
-            min_gen = min(house.get_demand(), generation)
-            generation = max(0, generation - min_gen)
-            house.refresh(min_gen)
-        min_gen = min(self.school.get_demand(), generation)
-        self.school.refresh(min_gen)
 
     def __str__(self):
         house_strings = [f'House {i + 1} - Demand={house.get_demand()}' for i, house in enumerate(self.houses)]
