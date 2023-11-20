@@ -4,6 +4,15 @@ import spade
 
 
 async def start_agents(agents):
+    """
+    Start the provided list of agents asynchronously.
+
+    Args:
+        agents (list): List of Agent objects.
+
+    Returns:
+        None
+    """
     for i, agent in enumerate(agents):
         print(i)
         await agent.start()
