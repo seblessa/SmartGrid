@@ -79,5 +79,6 @@ Time Agent: time_agent@localhost
 - Centralização vs Descentralização.
 - Contract net
 
-Resposta do GPT para usarmos o encapsulamento de agentes:
-Seb, for a multi-agent system in smart grid management, it's advisable to encapsulate agents within each other. This helps create a modular and organized structure, allowing for better management, communication, and coordination among agents. It also facilitates the implementation of agent-specific functionalities and promotes a clearer separation of concerns.
+
+To do list
+- Class 

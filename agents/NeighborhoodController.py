@@ -17,7 +17,6 @@ class NeighborhoodController(Agent):
         self.generation = generation
 
     async def setup(self):
-        # print("GreenPowerControllerAgent started")
         self.generation = 0
         self.add_behaviour(self.ReceivingMessages())
         self.add_behaviour(self.SendGeneration())
@@ -36,14 +35,17 @@ class NeighborhoodController(Agent):
                     pass
                 else:
                     print(f"Neighborhood Controller Agent Received '{message.body}' message from: {message_author}.")
-            await asyncio.sleep(0)
 
     class SendGeneration(OneShotBehaviour):
         async def run(self):
-            # print("Sending green generation produced!")
+            # print("Sending generation produced!")
             msg = Message(to="house_demander@localhost ")  # Instantiate the message
-            msg.set_metadata("generation", str(self.agent.get_generation()))
+            msg.set_metadata("generation", str(self.agent.get_generation()), )
             msg.body = "Values sent!"
 
+            msg1 = Message(to="school_demander@localhost")  # Instantiate the message
+            msg1.set_metadata("generation", str(self.agent.get_generation()))
+            msg1.body = "Values sent!"
+
             await self.send(msg)
-            await asyncio.sleep(0)
+            await self.send(msg1)

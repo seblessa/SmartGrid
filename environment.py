@@ -8,7 +8,7 @@ class SmartGridEnvironment:
 
         self.current_time = (1, "Monday", "day")
 
-        self.neighborhoods = [Neighborhood() for _ in range(random.randint(3, 5))]
+        self.neighborhoods = [Neighborhood() for _ in range(random.randint(3, 6))]
         self.hospital = Hospital(sum([neighborhood.get_houses_demand() for neighborhood in self.neighborhoods]))
         self.policeDepartment = PoliceDepartment(self.neighborhoods)
         self.fireDepartment = FireDepartment(self.neighborhoods)
@@ -106,6 +106,9 @@ class SmartGridEnvironment:
         return self.__solar_generation
 
     # TODO - }
+
+    def get_city_name(self):
+        return self.city_name
 
     def __update_demand(self):
         demand = 0
