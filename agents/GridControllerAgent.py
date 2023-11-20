@@ -125,3 +125,4 @@ class GridControllerAgent(Agent):
             msg.body = str(self.energy_needed)
             await self.send(msg)
             # print(f"Grid Controller Agent requested {self.energy_needed} more energy to fossil fuel power generator.")
+            
