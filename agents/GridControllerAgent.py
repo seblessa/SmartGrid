@@ -5,6 +5,14 @@ from spade.message import Message
 
 
 class GridControllerAgent(Agent):
+    """
+    Represents an agent that controls the distribution of energy among different entities.
+
+    Args:
+        jid (str): The agent's JID (Jabber ID).
+        password (str): The password for the agent.
+        env: The environment associated with the agent.
+    """
     def __init__(self, jid, password, env):
         super().__init__(jid, password)
         self.env = env
@@ -22,16 +30,34 @@ class GridControllerAgent(Agent):
         self.firefighters_demand = 0
 
     def all_messages_received(self):
+        """
+        Checks if all the necessary messages from different entities are received.
+
+        Returns:
+            bool: True if all messages are received, False otherwise.
+        """
         return self.green_message and self.ff_message and self.hospital_message and self.police_message and self.firefighters_message and self.neighborhood_message
 
     def get_demand(self):
+        """
+            Calculates the total energy demand from all entities.
+
+            Returns:
+                int: The total energy demand.
+        """
         return self.neighbours_demand + self.hospital_demand + self.police_demand + self.firefighters_demand
 
     async def setup(self):
+        """
+        Set up the GridControllerAgent by adding a cyclic behavior for receiving data.
+        """
         # print("GridControllerAgent started")
         self.add_behaviour(self.ReceivingData())
 
     class ReceivingData(CyclicBehaviour):
+        """
+        A cyclic behavior for receiving data from different entities and updating energy generation.
+        """
         async def run(self):
             message = await self.receive()
             if message:
@@ -81,6 +107,9 @@ class GridControllerAgent(Agent):
                 await sending_behav.wait()
 
     class SendingData(OneShotBehaviour):
+        """
+        A one-shot behavior for sending energy to different entities based on priority.
+        """
         async def run(self):
             if self.agent.generation < self.agent.get_demand():
                 # Not enough energy to supply all demand
@@ -116,6 +145,9 @@ class GridControllerAgent(Agent):
             await self.send(msg_to_neighborhood)
 
     class RequestMoreEnergy(OneShotBehaviour):
+        """
+        A one-shot behavior for requesting more energy from the fossil fuel power generator.
+        """
         def __init__(self, energy_needed):
             super().__init__()
             self.energy_needed = energy_needed
@@ -125,4 +157,3 @@ class GridControllerAgent(Agent):
             msg.body = str(self.energy_needed)
             await self.send(msg)
             # print(f"Grid Controller Agent requested {self.energy_needed} more energy to fossil fuel power generator.")
-            

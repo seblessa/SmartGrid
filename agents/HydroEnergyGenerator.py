@@ -6,18 +6,37 @@ from spade.message import Message
 
 
 class HydroEnergyGenerator(Agent):
+    """
+    Represents an agent that generates hydro energy.
+
+    Args:
+        jid (str): The agent's JID (Jabber ID).
+        password (str): The password for the agent.
+    """
     def __init__(self, jid, password):
         super().__init__(jid, password)
         self.__hydro_generation = 10000
 
     def set_generation(self, generation):
+        """
+        Sets the hydro energy generation level.
+
+        Args:
+            generation (int): The hydro energy generation level.
+        """
         self.__hydro_generation = generation
 
     async def setup(self):
+        """
+        Set up the HydroEnergyGenerator agent by adding a behavior for updating energy generation.
+        """
         # print("Hydro Generator started")
         self.add_behaviour(self.UpdateGeneration())
 
     class UpdateGeneration(CyclicBehaviour):
+        """
+        A cyclic behavior for updating hydro energy generation based on the time of the day and week.
+        """
         async def run(self):
             message = await self.receive()
             if message:
@@ -46,6 +65,9 @@ class HydroEnergyGenerator(Agent):
                     print(f"Hydro Energy Generator Received '{message.body}' message from: {message_author}.")
 
     class SendGeneration(OneShotBehaviour):
+        """
+        A one-shot behavior for sending hydro energy generation information to the green power controller.
+        """
         async def run(self):
             # print("Sending all Hydro generation produced!")
             msg = Message(to="green_power_controller@localhost")
