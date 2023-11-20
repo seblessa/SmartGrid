@@ -11,6 +11,15 @@ import random
 
 
 class ChronoCartographerAgent(Agent):
+    """
+        Represents an agent that manages time and updates the environment.
+
+        Args:
+            jid (str): The agent's JID (Jabber ID).
+            password (str): The password for the agent.
+            env: The environment to manage.
+            TIMEOUT (int): The time interval for updates.
+        """
     def __init__(self, jid, password, env, TIMEOUT):
         super().__init__(jid, password)
         self.TIMEOUT = TIMEOUT
@@ -18,6 +27,9 @@ class ChronoCartographerAgent(Agent):
         self.env = env
 
     def update_time(self):
+        """
+            Updates the time in the environment.
+        """
         day, weekday, day_or_night = self.time
         days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         if day_or_night == "day":
@@ -27,7 +39,6 @@ class ChronoCartographerAgent(Agent):
 
     async def setup(self):
         # print("TimeControllerAgent started")
-
         def start_pygame():
             pygame.init()
             pygame.display.set_caption(self.env.get_name())
@@ -40,6 +51,9 @@ class ChronoCartographerAgent(Agent):
         self.add_behaviour(self.TimeUpdate(period=self.TIMEOUT))
 
     class TimeUpdate(PeriodicBehaviour):
+        """
+            Sends time updates to energy generators and sleeps for a short duration.
+        """
         async def run(self):
             self.agent.update_time()
             agent_list = [
@@ -55,6 +69,9 @@ class ChronoCartographerAgent(Agent):
             print(self.agent.env)
 
     class DrawMap(CyclicBehaviour):
+        """
+             Draws the map using pygame to display the environment state.
+        """
         async def run(self):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -92,6 +109,20 @@ class ChronoCartographerAgent(Agent):
             screen.blit(balance_text, (x + 20, y + 33))
 
             def check_collision(a, b, width, height, existing_positions, r=20):
+                """
+                    Checks if a collision occurs between rectangles.
+
+                    Args:
+                        a (int): The x-coordinate of the first rectangle.
+                        b (int): The y-coordinate of the first rectangle.
+                        width (int): The width of the rectangle.
+                        height (int): The height of the rectangle.
+                        existing_positions (list): List of existing positions to check for collision.
+                        r (int): The collision radius.
+
+                    Returns:
+                        bool: True if a collision occurs, False otherwise.
+                """
                 new_rect = pygame.Rect(a - r, b - r, width + 2 * r, height + 2 * r)
                 for existing_rect in existing_positions:
                     if new_rect.colliderect(existing_rect):
