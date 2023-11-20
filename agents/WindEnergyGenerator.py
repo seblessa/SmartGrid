@@ -5,6 +5,13 @@ from spade.message import Message
 
 
 class WindEnergyGenerator(Agent):
+    """
+    Represents a wind energy generator agent.
+
+    Args:
+        jid (str): The agent's JID (Jabber ID).
+        password (str): The password for the agent.
+    """
     def __init__(self, jid, password):
         print("***")
         super().__init__(jid, password)
@@ -12,13 +19,25 @@ class WindEnergyGenerator(Agent):
         self.__wind_generation = self.__values[0]
 
     def set_generation(self, generation):
+        """
+        Sets the wind energy generation for the generator.
+
+        Args:
+                generation (int): The wind energy generation value.
+        """
         self.__wind_generation = generation
 
     async def setup(self):
+        """
+        Set up the WindEnergyGenerator agent by adding a behavior for updating wind energy generation.
+        """
         # print("Wind Generator started")
         self.add_behaviour(self.UpdateGeneration())
 
     class UpdateGeneration(CyclicBehaviour):
+        """
+        A cyclic behavior for updating wind energy generation based on messages received from the time controller.
+        """
         async def run(self):
             message = await self.receive()
             if message:
@@ -44,6 +63,9 @@ class WindEnergyGenerator(Agent):
                     print(f"Wind Energy Generator Received '{message.body}' message from: {message_author}.")
 
     class SendGeneration(OneShotBehaviour):
+        """
+        A one-shot behavior for sending the current wind energy generation value to the wind energy controller.
+        """
         async def run(self):
             # print("Sending all wind generation produced!")
             msg = Message(to="wind_energy_controller@localhost")

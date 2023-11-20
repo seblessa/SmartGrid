@@ -5,18 +5,37 @@ from spade.message import Message
 
 
 class SolarEnergyGenerator(Agent):
+    """
+    Represents an agent that generates solar energy.
+
+    Args:
+        jid (str): The agent's JID (Jabber ID).
+        password (str): The password for the agent.
+    """
     def __init__(self, jid, password):
         super().__init__(jid, password)
         self.__solar_generation = 0
 
     def set_generation(self, generation):
+        """
+        Sets the solar energy generation level.
+
+        Args:
+             generation (int): The solar energy generation level.
+        """
         self.__solar_generation = generation
 
     async def setup(self):
+        """
+        Set up the SolarEnergyGenerator agent by adding a behavior for updating solar energy generation.
+        """
         # print("Solar Generator started")
         self.add_behaviour(self.UpdateGeneration())
 
     class UpdateGeneration(CyclicBehaviour):
+        """
+        A cyclic behavior for updating solar energy generation based on messages received from the time controller.
+        """
         async def run(self):
             message = await self.receive()
             if message:
@@ -38,6 +57,9 @@ class SolarEnergyGenerator(Agent):
                     print(f"Solar Energy Generator Received '{message.body}' message from: {message_author}.")
 
     class SendGeneration(OneShotBehaviour):
+        """
+        A one-shot behavior for sending solar energy generation information to the solar energy controller.
+        """
         async def run(self):
             # print("Sending all wind generation produced!")
             msg = Message(to="solar_energy_controller@localhost")
