@@ -47,16 +47,3 @@ The agents are the following:
 | `school_demander@localhost`             | `SmartGrid` |
 | `house_demander@localhost`              | `SmartGrid` |
 | `map_drawer@localhost`                  | `SmartGrid` |
-
-
-
-
-## Interesting for our project
-
-- Ter os agentes a comunicar entre si e não com o ambiente onde existem (ambiente multi-agente)
-- Centralização vs Descentralização.
-- Contract net
-
-
-To do list
-- Class 
