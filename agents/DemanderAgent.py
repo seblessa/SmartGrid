@@ -14,8 +14,8 @@ class DemanderAgent(Agent):
     """
     def __init__(self, jid, password, consumer):
         super().__init__(jid, password)
-        self.__consumer = consumer
-        self.__demand = consumer.get_demand()
+        self.consumer = consumer
+        self.demand = consumer.get_demand()
 
     async def setup(self):
         """
@@ -36,14 +36,13 @@ class DemanderAgent(Agent):
                 # print("Received message!")
                 if message_author == "grid_controller@localhost":
                     # print(f"Demander Received {int(message.body)} message from: grid_controller.")
-                    self.agent.__consumer.update_generation(int(message.body))
+                    self.agent.consumer.set_generation(int(message.body))
 
     class SendGeneration(OneShotBehaviour):
         """
         A one-shot behaviour for sending energy demand to the grid controller.
         """
         async def run(self):
-            # print("Sending demand!")
             msg = Message(to="grid_controller@localhost")
-            msg.body = str(self.agent.__demand)
+            msg.body = str(self.agent.demand)
             await self.send(msg)

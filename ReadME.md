@@ -30,7 +30,6 @@ The agents are the following:
 
 ### List of users on our server
 
-Time Agent: time_agent@localhost
 
 | Username                                | Password    |
 |-----------------------------------------|-------------|
@@ -39,9 +38,7 @@ Time Agent: time_agent@localhost
 | `fossil_fuel_power_generator@localhost` | `SmartGrid` |
 | `green_power_controller@localhost`      | `SmartGrid` |
 | `wind_energy_controller@localhost`      | `SmartGrid` |
-| `wind_energy_generator@localhost`       | `SmartGrid` |
 | `solar_energy_controller@localhost`     | `SmartGrid` |
-| `solar_energy_generator@localhost`      | `SmartGrid` |
 | `hydro_energy_generator@localhost`      | `SmartGrid` |
 | `hospital_demander@localhost`           | `SmartGrid` |
 | `fire_station_demander@localhost`       | `SmartGrid` |
@@ -49,6 +46,7 @@ Time Agent: time_agent@localhost
 | `neighborhood_controller@localhost`     | `SmartGrid` |
 | `school_demander@localhost`             | `SmartGrid` |
 | `house_demander@localhost`              | `SmartGrid` |
+| `map_drawer@localhost`                  | `SmartGrid` |
 
 
 

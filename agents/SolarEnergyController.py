@@ -1,8 +1,9 @@
 import json
+import random
+
 from spade.agent import Agent
 from spade.behaviour import OneShotBehaviour, CyclicBehaviour
 from spade.message import Message
-from agents import SolarEnergyGenerator
 
 
 class SolarEnergyController(Agent):
@@ -12,13 +13,12 @@ class SolarEnergyController(Agent):
     Args:
         jid (str): The agent's JID (Jabber ID).
         password (str): The password for the agent.
-        n_generators (int): The number of solar energy generators associated with the controller.
     """
-    def __init__(self, jid, password, n_generators):
+
+    def __init__(self, jid, password, generators):
         super().__init__(jid, password)
-        self.__n_generators = n_generators
-        self.__n_generators_received = 0
-        self.__solar_generation = 0
+        self.generators = generators
+        self.solar_generation = 0
 
     def sum_solar_generation(self, solar_generation):
         """
@@ -27,48 +27,52 @@ class SolarEnergyController(Agent):
         Args:
             solar_generation (int): The solar energy generation to be added.
         """
-        self.__solar_generation += solar_generation
+        self.solar_generation += solar_generation
 
     async def setup(self):
         """
         Set up the SolarEnergyController agent by adding behaviors for updating solar energy generation and starting solar energy generators.
         """
         # print("WindEnergyController started")
+        self.add_behaviour(self.SendGeneration())
         self.add_behaviour(self.UpdateGeneration())
-        for i in range(self.__n_generators):
-            agent = SolarEnergyGenerator("solar_energy_generator@localhost", "SmartGrid")
-            await agent.start()
 
     class UpdateGeneration(CyclicBehaviour):
         """
          cyclic behavior for updating solar energy generation based on messages received from solar energy generators.
         """
+
         async def run(self):
             message = await self.receive()
             if message:
                 message_author = str(message.sender)
                 # print("Received message!")
-                if message_author == "solar_energy_generator@localhost":
-                    if self.agent.__n_generators_received == 0:
-                        self.agent.__solar_generation = 0
-                    # print(f"WindEnergyController Received {int(message.body)} message from: wind_generator.")
-                    self.agent.__n_generators_received += 1
-                    self.agent.sum_solar_generation(int(message.body))
+                if message_author == "time_agent@localhost":
+                    # print(f"SolarEnergy Generator received {message.body} from: time_controller.")
+                    day, week_day, day_or_night = json.loads(message.body)
 
-                    if self.agent.__n_generators_received == self.agent.__n_generators:
-                        send_behaviour = self.agent.SendGeneration()
-                        self.agent.add_behaviour(send_behaviour)
-                        await send_behaviour.wait()
+                    if day_or_night == "day":
+                        for generator in self.agent.generators:
+                            generator.set_generation(random.randint(1000, 3000))
+                    else:  # day_or_night == "night":
+                        for generator in self.agent.generators:
+                            generator.set_generation(0)
+
+                    self.agent.solar_generation = sum(generator.get_generation() for generator in self.agent.generators)
+
+                    self.agent.add_behaviour(self.agent.SendGeneration())
+                else:
+                    print(f"Solar Energy Controller Received '{message.body}' message from: {message_author}.")
 
     class SendGeneration(OneShotBehaviour):
         """
         A one-shot behavior for sending total solar energy generation information to the green power controller.
         """
+
         async def run(self):
-            # print("Sending all wind generation produced!")
             msg = Message(to="green_power_controller@localhost")
-            data_to_send = {"solar_generation": self.agent.__solar_generation}
-            msg.body = json.dumps(data_to_send)
+            msg.body = str(self.agent.solar_generation)
+            # print(f"Sending {msg.body} solar generation produced to {msg.to}!")
             await self.send(msg)
-            self.agent.__wind_generation = 0
-            self.agent.__n_generators_received = 0
+            self.agent.solar_generation = 0
+            self.agent.n_generators_received = 0

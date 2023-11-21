@@ -7,9 +7,6 @@ from .GridControllerAgent import GridControllerAgent
 from .HydroEnergyGenerator import HydroEnergyGenerator
 from .NeighborhoodController import NeighborhoodController
 from .SolarEnergyController import SolarEnergyController
-from .SolarEnergyGenerator import SolarEnergyGenerator
-from .ChronoCartographerAgent import ChronoCartographerAgent
+from .TimeAgent import TimeAgent
 from .WindEnergyController import WindEnergyController
-from .WindEnergyGenerator import WindEnergyGenerator
-
-TIMEOUT = 3
+from .MapDrawerAgent import MapDrawerAgent

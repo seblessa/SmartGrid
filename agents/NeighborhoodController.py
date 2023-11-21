@@ -14,8 +14,8 @@ class NeighborhoodController(Agent):
     """
     def __init__(self, jid, password, neighborhoods):
         super().__init__(jid, password)
-        self.__neighborhoods = neighborhoods
-        self.__demand = sum([neighborhood.get_demand() for neighborhood in self.__neighborhoods])
+        self.neighborhoods = neighborhoods
+        self.demand = sum([neighborhood.get_demand() for neighborhood in self.neighborhoods])
 
     async def setup(self):
         """
@@ -37,7 +37,7 @@ class NeighborhoodController(Agent):
                 if message_author == "grid_controller@localhost":
                     # print(f"Neighborhood Controller Received {int(message.body)} message from: grid_controller.")
                     generation = int(message.body)
-                    for neighborhood in self.agent.__neighborhoods:
+                    for neighborhood in self.agent.neighborhoods:
                         min_gen = min(neighborhood.get_demand(), generation)
                         generation = max(0, generation - min_gen)
                         neighborhood.update_generation(min_gen)
@@ -47,7 +47,7 @@ class NeighborhoodController(Agent):
         A one-shot behavior for sending total energy demand to the grid controller.
         """
         async def run(self):
-            # print("Sending demand!")
             msg = Message(to="grid_controller@localhost")
-            msg.body = str(self.agent.__demand)
+            msg.body = str(self.agent.demand)
+            # print(f"Sending {msg.body} demand!")
             await self.send(msg)

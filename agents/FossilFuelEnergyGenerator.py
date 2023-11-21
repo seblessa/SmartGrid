@@ -11,19 +11,11 @@ class FossilFuelEnergyGenerator(Agent):
         jid (str): The agent's JID (Jabber ID).
         password (str): The password for the agent.
     """
-    def __init__(self, jid, password):
+    def __init__(self, jid, password, generator):
         super().__init__(jid, password)
-        self.__generation = 0
-        self.__limit = 25000
-
-    def set_generation(self, generation):
-        """
-        Sets the energy generation level for the fossil fuel generator.
-
-        Args:
-            generation (int): The energy generation level.
-        """
-        self.__generation = generation
+        self.generator = generator
+        self.generation = 0
+        self.limit = 500000000
 
     async def setup(self):
         """
@@ -42,12 +34,13 @@ class FossilFuelEnergyGenerator(Agent):
                 message_author = str(message.sender)
                 # print("Received message!")
                 if message_author == "grid_controller@localhost":
-                    # print(f"Fossil Fuel Generator Received {message.body} message from: grid_controller.")
+                    # print(f"Fossil Fuel Generator received {message.body} from: grid_controller.")
                     energy_needed = int(message.body)
-                    self.agent.set_generation(min(energy_needed, self.agent.__limit))
+                    self.agent.generation = min(energy_needed, self.agent.limit)
+                    self.agent.generator.set_generation(self.agent.generation)
+
                     send_behaviour = self.agent.SendGeneration()
                     self.agent.add_behaviour(send_behaviour)
-                    await send_behaviour.wait()
                 else:
                     print(f"Fossil Fuel Generator Received '{message.body}' message from: {message_author}.")
 
@@ -56,7 +49,7 @@ class FossilFuelEnergyGenerator(Agent):
         A one-shot behavior for sending the generated energy to the grid controller.
         """
         async def run(self):
-            # print("Sending all wind generation produced!")
             msg = Message(to="grid_controller@localhost")
-            msg.body = str(self.agent.__generation)
+            msg.body = str(self.agent.generation)
+            # print(f"Sending {msg.body} fossil fuel generation produced to {msg.to}!")
             await self.send(msg)

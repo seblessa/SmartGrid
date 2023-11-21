@@ -1,9 +1,7 @@
-import json
+import random
 from spade.agent import Agent
 from spade.behaviour import OneShotBehaviour, CyclicBehaviour
 from spade.message import Message
-
-from agents import WindEnergyGenerator
 
 
 class WindEnergyController(Agent):
@@ -13,13 +11,11 @@ class WindEnergyController(Agent):
     Args:
         jid (str): The agent's JID (Jabber ID).
         password (str): The password for the agent.
-        n_generators (int): The number of wind energy generators associated with the controller.
     """
-    def __init__(self, jid, password, n_generators):
+    def __init__(self, jid, password, generators):
         super().__init__(jid, password)
-        self.__n_generators = n_generators
-        self.__n_generators_received = 0
-        self.__wind_generation = 0
+        self.generators = generators
+        self.wind_generation = 0
 
     def sum_wind_generation(self, wind_generation):
         """
@@ -28,19 +24,14 @@ class WindEnergyController(Agent):
         Args:
             wind_generation (int): The wind energy generation to be added.
         """
-        self.__wind_generation += wind_generation
+        self.wind_generation += wind_generation
 
     async def setup(self):
         """
         Set up the WindEnergyController agent by adding behaviors for updating wind energy generation and starting wind energy generators.
         """
-        # print("WindEnergyController started")
+        self.add_behaviour(self.SendGeneration())
         self.add_behaviour(self.UpdateGeneration())
-        for i in range(self.__n_generators):
-            print(i)
-            agent = WindEnergyGenerator("wind_energy_generator@localhost", "SmartGrid")
-            await agent.start()
-        print("***")
 
     class UpdateGeneration(CyclicBehaviour):
         """
@@ -51,27 +42,25 @@ class WindEnergyController(Agent):
             if message:
                 message_author = str(message.sender)
                 # print("Received message!")
-                if message_author == "wind_energy_generator@localhost":
-                    if self.agent.__n_generators_received == 0:
-                        self.agent.__wind_generation = 0
-                    # print(f"WindEnergyController Received {int(message.body)} message from: wind_generator.")
-                    self.agent.__n_generators_received += 1
-                    self.agent.sum_wind_generation(int(message.body))
+                if message_author == "time_agent@localhost":
+                    # print(f"Wind Energy Generator received {message.body} message from: time_controller.")
+                    # day, week_day, day_or_night = json.loads(message.body)
 
-                    if self.agent.__n_generators_received == self.agent.__n_generators:
-                        send_behaviour = self.agent.SendGeneration()
-                        self.agent.add_behaviour(send_behaviour)
-                        await send_behaviour.wait()
+                    for generator in self.agent.generators:
+                        generator.set_generation(random.randint(0, 3000))
+
+                    self.agent.wind_generation = sum(generator.get_generation() for generator in self.agent.generators)
+
+                    self.agent.add_behaviour(self.agent.SendGeneration())
+                else:
+                    print(f"Wind Energy Controller received '{message.body}' from: {message_author}.")
 
     class SendGeneration(OneShotBehaviour):
         """
         A one-shot behavior for sending total wind energy generation information to the green power controller.
         """
         async def run(self):
-            # print("Sending all wind generation produced!")
             msg = Message(to="green_power_controller@localhost")
-            data_to_send = {"wind_generation": self.agent.__wind_generation}
-            msg.body = json.dumps(data_to_send)
+            msg.body = str(self.agent.wind_generation)
+            # print(f"Sending {msg.body} wind generation produced to {msg.to}!")
             await self.send(msg)
-            self.agent.__wind_generation = 0
-            self.agent.__n_generators_received = 0

@@ -29,17 +29,10 @@ class Structure:
         """
         return int(self.generation)
 
-    def update_generation(self, energy):
+    def set_generation(self, energy):
         """
-        Update the generation of the structure.
+        Set the generation of the structure.
         :param energy: The energy to add to the generation.
-        """
-        self.generation += energy
-
-    def refresh(self, energy):
-        """
-        Refresh the structure with new energy and update online status.
-        :param energy: The new energy for the structure.
         """
         self.generation = energy
         self.online = self.generation - self.demand >= 0
@@ -111,9 +104,9 @@ class Neighborhood:
         for house in self.houses:
             min_gen = min(house.get_demand(), energy)
             energy = max(0, energy - min_gen)
-            house.refresh(min_gen)
+            house.set_generation(min_gen)
         min_gen = min(self.school.get_demand(), energy)
-        self.school.refresh(min_gen)
+        self.school.set_generation(min_gen)
 
     def get_n_houses(self):
         """
@@ -210,12 +203,14 @@ class WindTurbine:
         """
         Initialize a new wind turbine with default values.
         """
-        self.generation = 100
-        self.conditions = [
-            ("Not generating", 1), ("Not favorable", 10), ("Mildly favorable", 9),
-            ("Favorable", 8), ("Very favorable", 7), ("Maximum generation", 6)
-        ]
-        self.current_condition_index = 1
+        self.generation = 0
+
+    def set_generation(self, generation):
+        """
+        Set the generation of the wind turbine.
+        :param generation: The generation of the wind turbine.
+        """
+        self.generation = generation
 
     def get_generation(self):
         """
@@ -224,35 +219,6 @@ class WindTurbine:
         """
         return int(self.generation)
 
-    def refresh(self):
-        """
-        Refresh the wind turbine's generation based on conditions.
-        """
-        previous_index = max(0, self.current_condition_index - 1)
-        next_index = min(len(self.conditions) - 1, self.current_condition_index + 1)
-
-        previous_weight = self.conditions[previous_index][1]
-        next_weight = self.conditions[next_index][1]
-
-        # Generate a random choice based on the weights
-        choices = [previous_index, next_index]
-        selected_index = random.choices(choices, [previous_weight, next_weight])[0]
-
-        self.current_condition_index = selected_index
-        condition, _ = self.conditions[self.current_condition_index]
-
-        if condition == "Not generating":
-            self.generation = 0
-        elif condition == "Not favorable":
-            self.generation = 2500
-        elif condition == "Mildly favorable":
-            self.generation = 5000
-        elif condition == "Favorable":
-            self.generation = 7500
-        elif condition == "Very favorable":
-            self.generation = 10000
-        elif condition == "Maximum generation":
-            self.generation = 15000
 
 
 class SolarPanel:
@@ -260,7 +226,14 @@ class SolarPanel:
         """
         Initialize a new solar panel with default values.
         """
-        self.generation = 100
+        self.generation = 0
+
+    def set_generation(self, generation):
+        """
+        Set the generation of the wind turbine.
+        :param generation: The generation of the wind turbine.
+        """
+        self.generation = generation
 
     def get_generation(self):
         """
@@ -269,24 +242,13 @@ class SolarPanel:
         """
         return int(self.generation)
 
-    def refresh(self, time):
-        """
-        Refresh the solar panel's generation based on time of day.
-        :param time: Tuple containing day, weekday, and day_or_night.
-        """
-        day, weekday, day_or_night = time
-        if day_or_night == "day":
-            self.generation = random.randint(1000, 1500)
-        else:
-            self.generation = 0
-
 
 class HydroEnergyStation:
     def __init__(self):
         """
         Initialize a new hydro energy station with default values.
         """
-        self.generation = 100
+        self.generation = 0
 
     def get_generation(self):
         """
@@ -295,13 +257,12 @@ class HydroEnergyStation:
         """
         return int(self.generation)
 
-    def refresh(self):
+    def set_generation(self, generation):
         """
-        Refresh the hydro energy station's generation with random values.
+        Set the generation of the hydro energy station.
+        :param generation: The generation of the hydro energy station.
         """
-        values = [250, 1000, 2500, 5000, 7500, 1000, 12500]
-        index = random.randint(0, len(values) - 1)
-        self.generation = values[index]
+        self.generation = generation
 
 
 class FossilFuelEnergyStation:
@@ -318,16 +279,9 @@ class FossilFuelEnergyStation:
         """
         return int(self.generation)
 
-    def increase_generation(self, increase_value):
+    def set_generation(self, generation):
         """
-        Increase the generation of the fossil fuel energy station.
-        :param increase_value: The value to increase the generation by.
+        Set the generation of the fossil fuel energy station.
+        :param generation: The generation of the fossil fuel energy station.
         """
-        self.generation += increase_value
-
-    def decrease_generation(self, decrease_value):
-        """
-        Decrease the generation of the fossil fuel energy station.
-        :param decrease_value: The value to decrease the generation by.
-        """
-        self.generation = max(0, self.generation - decrease_value)
+        self.generation = generation
