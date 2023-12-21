@@ -1,5 +1,9 @@
 # Multi-Agent System for Smart Grid Management
 
+**Authors**
+- [Margarida Vila Chã](https://github.com/margaridavc/)
+- [Sebastião Santos Lessa](https://github.com/seblessa/)
+
 #### Python versions used:
 
 `Python 3.11.5`
